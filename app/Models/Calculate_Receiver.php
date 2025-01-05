@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Calculate_Receiver extends Model
 {
@@ -12,8 +11,12 @@ class Calculate_Receiver extends Model
 
     protected $table = 'calculate__receivers';
     protected $fillable = [
-        'calculate_id',
+        'penilaian_id',
         'receiver_id',
-        'weight',
     ];
+
+    public function penerima()
+    {
+        return  $this->belongsTo(Receiver::class, 'receiver_id');
+    }
 }

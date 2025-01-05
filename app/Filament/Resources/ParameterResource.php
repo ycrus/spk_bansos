@@ -65,25 +65,21 @@ class ParameterResource extends Resource
                     ->alignLeft(),
 
                 TextColumn::make('operation')
-                    ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
 
                 TextColumn::make('start')
-                    ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
 
                 TextColumn::make('end')
-                    ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
 
                 TextColumn::make('unit')
-                    ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
@@ -100,7 +96,8 @@ class ParameterResource extends Resource
                     ->weight('medium')
                     ->alignLeft(),
 
-                TextColumn::make('criteria.title'),
+                TextColumn::make('criteria.title')
+                    ->searchable(),
             ])
             ->filters([
                 //

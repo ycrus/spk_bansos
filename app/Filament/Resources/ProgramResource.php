@@ -3,11 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProgramResource\Pages;
-use App\Filament\Resources\ProgramResource\RelationManagers;
-use App\Filament\Resources\ProgramResource\RelationManagers\CriteriaRelationManager;
 use App\Models\Criteria;
 use App\Models\Program;
-use Filament\Actions\Action;
 use Filament\Forms\Set;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
@@ -18,11 +15,13 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+
 
 class ProgramResource extends Resource
 {
@@ -34,73 +33,59 @@ class ProgramResource extends Resource
     {
         return $form
             ->schema([
+
                 Group::make()->schema([
                     Section::make('Program')
                         ->schema([
-                            TextInput::make('name')
+                            TextInput::make('name'),
                         ]),
-
-
                 ]),
                 Group::make()->schema([
                     Section::make()
                         ->schema([
                             Grid::make(2)
                                 ->schema([
-                                    Placeholder::make("total_criteria")
-                                        ->label("Total Criteria")
-                                        ->content(function ($get) {
-                                            return collect($get('criteria_id'))
-                                                ->pluck('criteria_id')
-                                                ->count();
+
+                                    Placeholder::make('totalweight')
+                                        ->label('Total Weight')
+                                        ->content(function (Get $get) {
+                                            $criteriaProgram = $get('criteriaProgram') ?? [];
+                                            $weights = array_map(fn($item) => (float) ($item['weight'] ?? 0), $criteriaProgram);
+
+                                            // Total weight
+                                            return array_sum($weights) . '%';
                                         }),
-                                    Placeholder::make('Total Criteria Weight')
-                                        ->label("Total Criteria")
-                                        ->content(function ($get) {
-                                            return collect($get('weight'))
-                                                ->sum($get('weight'));
-                                        })
                                 ])
                         ]),
                 ]),
-                Section::make()->schema([
+                Section::make('Criteria Program')->schema([
+                    Placeholder::make('error')
+                        ->content(function () {
+                            return session('error') ? session('error')->first('criteriaProgram') : '';
+                        })
+                        ->visible(fn() => session('error') && session('error')->has('criteriaProgram'))
+                        ->label(''),
                     Repeater::make("criteriaProgram")
                         ->relationship()
                         ->schema([
                             Select::make('criteria_id')
                                 ->columnSpan(2)
                                 ->options(Criteria::query()->pluck('title', 'id'))
+                                ->rules(['distinct'])
                                 ->required(),
 
                             TextInput::make('weight')
                                 ->numeric()
                                 ->columnSpan(1)
-                                ->live()
                                 ->afterStateUpdated(function (Get $get, Set $set) {
-                                    // $get('bobot', 'weight');
-                                    $set('bobot', 'weight');
+                                    self::updateTotals($get, $set);
                                 })
+                                ->rules(['required', 'min:0', 'max:100']) // Validasi weight
                                 ->suffix('%')
-                                ->maxValue(Program::maxCriteria())
                                 ->default(0),
                         ])
-                        // ->extraItemActions([
-                        //     Action::make('ceck')
-                        //         ->before(function (Action $action) {
-                        //             if (! $this->record->is_passed) {
-                        //                 Notification::make()
-                        //                     ->title('This user quiz request must be passed to create meeting !')
-                        //                     ->error()
-                        //                     ->send();
-
-                        //                 $action->halt();
-                        //             }
-                        //         })
-                        //         ->icon('heroicon-m-envelope')
-                        //         ->action(function (array $arguments, Repeater $component): void {
-                        //             $itemData = $component->getItemState($arguments['weight']);
-                        //         }),
-                        // ])
+                        ->minItems(4)
+                        ->live()
                         ->orderColumn('id')
                         ->grid(2)
                         ->columns([
@@ -108,10 +93,32 @@ class ProgramResource extends Resource
                             'sm' => 3,
                             'md' => 3,
                             'lg' => 3
-                        ])->reactive(),
+                        ]),
                 ])
 
             ]);
+    }
+
+    public static function updateTotals(Get $get, Set $set): void
+    {
+        // $selectedProducts = collect($get('criteriaProgram'));
+        // Hitung total weight dari semua item
+        $items = $get('criteriaProgram') ?? [];
+        // Konversi setiap nilai weight menjadi numerik
+        $weights = array_map(fn($weight) => (float) $weight, array_column($items, 'weight'));
+
+        // Hitung total weight
+        $totalWeight = array_sum($weights);
+        $deviasiWeight = 100 - array_sum($weights);
+
+        if ($totalWeight > 100) {
+            $set('error', 'The total weight must not exceed 100%.');
+        } else {
+            $set('error', null); // Reset error jika validasi lolos
+        }
+
+        // Lakukan sesuatu dengan total weight (opsional)
+        $set('totalweight', $totalWeight);
     }
 
     public static function table(Table $table): Table
@@ -153,5 +160,44 @@ class ProgramResource extends Resource
             'create' => Pages\CreateProgram::route('/create'),
             'edit' => Pages\EditProgram::route('/{record}/edit'),
         ];
+    }
+
+    protected static function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Validasi total weight sebelum data disimpan
+        self::validateTotalWeight($data);
+
+        return $data;
+    }
+
+    protected static function mutateFormDataBeforeSave(array $data): array
+    {
+        // Validasi total weight sebelum data diperbarui
+        self::validateTotalWeight($data);
+
+        return $data;
+    }
+
+    private static function validateTotalWeight(array $data): void
+    {
+        $criteriaProgram = $data['criteriaProgram'] ?? [];
+
+        // Hitung total weight
+        $totalWeight = collect($criteriaProgram)->sum(fn($item) => (float) ($item['weight'] ?? 0));
+
+        // Validasi: Total weight tidak boleh lebih dari 100
+        if ($totalWeight > 100) {
+            Log::warning('Total weight exceeds 100%', ['total_weight' => $totalWeight]);
+            throw ValidationException::withMessages([
+                'criteriaProgram' => 'The total weight of all criteria must not exceed 100%.',
+            ]);
+        }
+
+        $criteriaIds = array_column($criteriaProgram, 'criteria_id');
+        if (count($criteriaIds) !== count(array_unique($criteriaIds))) {
+            throw ValidationException::withMessages([
+                'criteriaProgram' => 'Setiap kriteria harus unik.',
+            ]);
+        }
     }
 }

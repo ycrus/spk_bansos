@@ -25,7 +25,6 @@ class Receiver extends Model
         'status_tempat_tinggal',
         'status_perkawinan',
         'jumlah_tanggungan',
-        'status_tempat_tinggal',
         'keadaan_rumah',
         'disabilitas',
         'pendidikan',
@@ -39,11 +38,5 @@ class Receiver extends Model
         return Attribute::make(
             get: fn() => Carbon::parse($this->tanggal_lahir)->age,
         );
-    }
-
-
-    public function calculates(): BelongsToMany
-    {
-        return  $this->belongsToMany(Calculate::class, 'calculate__receivers')->withPivot(['weight'])->withTimestamps();
     }
 }

@@ -4,13 +4,20 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PenilaianResource\Pages;
 use App\Filament\Resources\PenilaianResource\RelationManagers;
+use App\Filament\Resources\PenilaianResource\RelationManagers\ReceiverPeriodRelationManager;
 use App\Models\Penilaian;
+use App\Models\Period;
+use App\Models\Receiver;
+use Filament\Tables\Actions\Action;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PenilaianResource extends Resource
@@ -23,7 +30,10 @@ class PenilaianResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Select::make('period_id')
+                    ->label('Period')
+                    ->options(Period::all()->pluck('name', 'id'))
+                    ->searchable(),
             ]);
     }
 
@@ -31,13 +41,21 @@ class PenilaianResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('period.name'),
+                TextColumn::make('status'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn($record) => $record->status === 'Active'),
+                Action::make('startButton')
+                    ->label('START')
+                    // ->url(fn(Model $record) => route('custom.route', $record))
+                    ->color('red')
+                    ->icon('heroicon-o-link')
+                    ->visible(fn($record) => $record->status === 'Active'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -49,7 +67,7 @@ class PenilaianResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ReceiverPeriodRelationManager::class
         ];
     }
 
