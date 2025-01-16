@@ -39,4 +39,9 @@ class Receiver extends Model
             get: fn() => Carbon::parse($this->tanggal_lahir)->age,
         );
     }
+
+    public function desa()
+    {
+        return  $this->belongsTo(Kelurahan::class, 'kelurahan');
+    }
 }

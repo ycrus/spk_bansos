@@ -32,7 +32,10 @@ class ReceiverResource extends Resource
         return $form
             ->schema([
                 TextInput::make('nama')->required(),
-                TextInput::make('nik')->unique(table: Receiver::class)->required(),
+                TextInput::make('nik')
+                    ->unique(table: 'receivers', column: 'nik', ignoreRecord: true)
+                    ->required()
+                    ->numeric(),
                 Select::make('kelurahan')
                     ->options(
                         Kelurahan::all()->pluck('name', 'id')
@@ -40,10 +43,6 @@ class ReceiverResource extends Resource
                 DatePicker::make('tanggal_lahir')
                     ->native(false)
                     ->required(),
-                // Select::make('umur')
-                //     ->options([
-                //         Parameter::where('criteria_id', '=', 2)->pluck('title', 'title')->toArray()
-                //     ])->native(false)->required(),
                 Select::make('pekerjaan')
                     ->options([
                         Parameter::where('criteria_id', '=', 3)->pluck('title', 'title')->toArray()
@@ -110,11 +109,11 @@ class ReceiverResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
-                TextColumn::make('umur')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
+                // TextColumn::make('umur')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->weight('medium')
+                //     ->alignLeft(),
                 TextColumn::make('pekerjaan')
                     ->searchable()
                     ->sortable()

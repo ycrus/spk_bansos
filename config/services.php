@@ -34,5 +34,8 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'api' => [
+        'surrounding_url' => env('SURROUNDING_URL', 'http://localhost:8080'),
+    ],
 
 ];

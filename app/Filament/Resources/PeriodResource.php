@@ -27,11 +27,12 @@ class PeriodResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name'),
+                TextInput::make('name')->required(),
                 Select::make('program_id')
                     ->label('Program')
                     ->options(Program::all()->pluck('name', 'id'))
-                    ->searchable(),
+                    ->searchable()
+                    ->required(),
                 Select::make('status')
                     ->label('Status')
                     ->options([
@@ -40,7 +41,8 @@ class PeriodResource extends Resource
                     ])
                     ->default(true) // Set default value to Active (true)
                     ->required(),
-                TextInput::make('description'),
+                TextInput::make('description')
+                    ->required(),
             ]);
     }
 

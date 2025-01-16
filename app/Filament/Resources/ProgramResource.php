@@ -69,11 +69,14 @@ class ProgramResource extends Resource
                         ->relationship()
                         ->schema([
                             Select::make('criteria_id')
+                                ->label('Criteria')
                                 ->columnSpan(2)
                                 ->options(Criteria::query()->pluck('title', 'id'))
-                                ->rules(['distinct'])
-                                ->required(),
-
+                                ->required()
+                                ->rules([
+                                    'distinct'
+                                ])
+                                ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
                             TextInput::make('weight')
                                 ->numeric()
                                 ->columnSpan(1)
@@ -109,9 +112,8 @@ class ProgramResource extends Resource
 
         // Hitung total weight
         $totalWeight = array_sum($weights);
-        $deviasiWeight = 100 - array_sum($weights);
 
-        if ($totalWeight > 100) {
+        if ($totalWeight != 100) {
             $set('error', 'The total weight must not exceed 100%.');
         } else {
             $set('error', null); // Reset error jika validasi lolos
@@ -186,7 +188,7 @@ class ProgramResource extends Resource
         $totalWeight = collect($criteriaProgram)->sum(fn($item) => (float) ($item['weight'] ?? 0));
 
         // Validasi: Total weight tidak boleh lebih dari 100
-        if ($totalWeight > 100) {
+        if ($totalWeight   !=  100) {
             Log::warning('Total weight exceeds 100%', ['total_weight' => $totalWeight]);
             throw ValidationException::withMessages([
                 'criteriaProgram' => 'The total weight of all criteria must not exceed 100%.',

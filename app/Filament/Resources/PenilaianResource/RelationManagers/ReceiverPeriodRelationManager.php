@@ -23,8 +23,14 @@ class ReceiverPeriodRelationManager extends RelationManager
             ->schema([
                 Select::make('receiver_id')
                     ->label('Penerima')
-                    ->options(Receiver::all()->pluck('nama', 'id'))
-                    ->searchable()
+                    ->options(
+                        Receiver::all()->mapWithKeys(function ($receiver) {
+                            return [$receiver->id => "{$receiver->nik} - {$receiver->nama}"];
+                        })
+                    )
+                    ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                    ->searchable(),
+
             ]);
     }
 
@@ -56,7 +62,10 @@ class ReceiverPeriodRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->label('Add') // Ubah label
+                    ->icon('heroicon-o-plus') // Tambahkan ikon
+                    ->color('success') // Warna tombol,
             ])
             ->actions([
                 // Tables\Actions\EditAction::make(),

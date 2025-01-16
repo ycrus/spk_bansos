@@ -13,7 +13,10 @@ class ListReceivers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Add') // Ubah label
+                ->icon('heroicon-o-plus') // Tambahkan ikon
+                ->color('success') // Warna tombol,,
         ];
     }
 }

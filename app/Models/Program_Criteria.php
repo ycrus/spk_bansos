@@ -31,11 +31,17 @@ class Program_Criteria extends Model
             $totalWeight += $model->weight;
 
             // Validasi: Total weight tidak boleh melebihi 100
-            if ($totalWeight > 100) {
+            if ($totalWeight > 100 || $totalWeight < 100) {
                 throw ValidationException::withMessages([
                     'weight' => 'The total weight for this program must not exceed 100%.',
                 ]);
             }
+
+            // if ($totalWeight < 100) {
+            //     throw ValidationException::withMessages([
+            //         'weight' => 'The total weight for this program must not exceed 100%.',
+            //     ]);
+            // }
         });
     }
 }

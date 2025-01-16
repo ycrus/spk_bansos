@@ -4,9 +4,9 @@ namespace App\Filament\Resources\ResultResource\Pages;
 
 use App\Filament\Resources\ResultResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Resources\Pages\ViewRecord;
 
-class ListResults extends ListRecords
+class ViewResult extends ViewRecord
 {
     protected static string $resource = ResultResource::class;
 

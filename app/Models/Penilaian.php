@@ -12,7 +12,9 @@ class Penilaian extends Model
 
     protected $table = 'penilaians';
     protected $fillable = [
-        'period_id'
+        'period_id',
+        'status',
+        'jumlah_penerima'
     ];
 
 
@@ -25,5 +27,29 @@ class Penilaian extends Model
     public function dataPenerima(): HasMany
     {
         return $this->hasMany(Calculate_Receiver::class);
+    }
+
+    public function nilaiParameter(): HasMany
+    {
+        return $this->hasMany(NilaiBobot::class);
+    }
+
+    public function nilaiUtility(): HasMany
+    {
+        return $this->hasMany(NilaiUtility::class);
+    }
+
+    public function nilaiAkhir(): HasMany
+    {
+        return $this->hasMany(NilaiAkhir::class);
+    }
+    public function ranking(): HasMany
+    {
+        return $this->hasMany(Rangking::class);
+    }
+
+    public function result(): HasMany
+    {
+        return $this->hasMany(Rangking::class);
     }
 }

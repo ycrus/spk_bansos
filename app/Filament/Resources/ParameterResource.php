@@ -33,19 +33,19 @@ class ParameterResource extends Resource
                 TextInput::make('description'),
                 TextInput::make('parameter_weight')
                     ->numeric(),
-                Select::make('operation')
-                    ->options([
-                        'Kurang Dari' => 'Kurang Dari',
-                        'Kurang Dari Sama Dengan' => 'Kurang Dari Sama Dengan',
-                        'Lebih Dari Sama Dengan' => 'Lebih Dari Sama Dengan',
-                        'Lebih Dari' => 'Lebih Dari',
-                        'Sama Dengan' => 'Sama Dengan',
-                        'Sampai' => 'Sampai',
-                    ])
-                    ->native(false),
-                TextInput::make('start'),
-                TextInput::make('end'),
-                TextInput::make('unit'),
+                // Select::make('operation')
+                //     ->options([
+                //         'Kurang Dari' => 'Kurang Dari',
+                //         'Kurang Dari Sama Dengan' => 'Kurang Dari Sama Dengan',
+                //         'Lebih Dari Sama Dengan' => 'Lebih Dari Sama Dengan',
+                //         'Lebih Dari' => 'Lebih Dari',
+                //         'Sama Dengan' => 'Sama Dengan',
+                //         'Sampai' => 'Sampai',
+                //     ])
+                //     ->native(false),
+                // TextInput::make('start'),
+                // TextInput::make('end'),
+                // TextInput::make('unit'),
 
                 Select::make('criteria_id')
                     ->label('Criteria')
@@ -64,25 +64,25 @@ class ParameterResource extends Resource
                     ->weight('medium')
                     ->alignLeft(),
 
-                TextColumn::make('operation')
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
+                // TextColumn::make('operation')
+                //     ->sortable()
+                //     ->weight('medium')
+                //     ->alignLeft(),
 
-                TextColumn::make('start')
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
+                // TextColumn::make('start')
+                //     ->sortable()
+                //     ->weight('medium')
+                //     ->alignLeft(),
 
-                TextColumn::make('end')
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
+                // TextColumn::make('end')
+                //     ->sortable()
+                //     ->weight('medium')
+                //     ->alignLeft(),
 
-                TextColumn::make('unit')
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
+                // TextColumn::make('unit')
+                //     ->sortable()
+                //     ->weight('medium')
+                //     ->alignLeft(),
 
                 TextColumn::make('description')
                     ->searchable()

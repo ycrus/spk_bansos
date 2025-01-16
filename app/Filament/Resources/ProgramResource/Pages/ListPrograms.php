@@ -13,7 +13,12 @@ class ListPrograms extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->mutateFormDataUsing(function (array $data): array {
+                    self::validateTotalWeight($data);
+
+                    return $data;
+                }),
         ];
     }
 }
