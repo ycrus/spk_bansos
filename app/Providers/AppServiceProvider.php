@@ -22,11 +22,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->app->booted(function () {
-            FilamentView::registerRenderHook(
-                'panels::auth.login.form.after',
-                fn() => View::make('filament.login_extra')
-            );
-        });
+        //
+        // $this->app->booted(function () {
+        //     FilamentView::registerRenderHook(
+        //         'panels::auth.login.form.after',
+        //         fn() => View::make('filament.login_extra')
+        //     );
+        // });
     }
 }
