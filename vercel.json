@@ -3,19 +3,9 @@
     "framework": null,
     "functions": {
         "api/index.php": {
-            "runtime": "vercel-php@0.6.1"
+            "runtime": "vercel-php@latest"
         }
     },
-    "builds": [
-        {
-            "src": "api/index.php",
-            "use": "@vercel/php"
-        },
-        {
-            "src": "public/**",
-            "use": "@vercel/static"
-        }
-    ],
     "routes": [
         {
             "src": "/images/(.*)",
