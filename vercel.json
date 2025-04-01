@@ -29,7 +29,8 @@
         "DB_PORT": "6543",
         "DB_DATABASE": "postgres",
         "DB_USERNAME": "postgres",
-        "DB_PASSWORD": "NEW_PASSWORD_HERE"
+        "DB_PASSWORD": "NEW_PASSWORD_HERE",
+        "VIEW_COMPILED_PATH": "/tmp"
     },
     "outputDirectory": "public"
 }

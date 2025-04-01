@@ -132,5 +132,10 @@ return [
         App\Providers\AppServiceProvider::class,
     ])->toArray(),
 
+    'compiled' => env(
+        'VIEW_COMPILED_PATH',
+        realpath(sys_get_temp_dir())
+    ),
+
 
 ];
