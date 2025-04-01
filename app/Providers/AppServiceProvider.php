@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         FilamentView::registerRenderHook(
             'panels::auth.login.form.after',
-            fn(): View => view('filament.login_extra')
+            fn() => view('filament.login_extra')
         );
     }
 }
