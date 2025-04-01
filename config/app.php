@@ -128,4 +128,9 @@ return [
         Illuminate\View\ViewServiceProvider::class,
     ],
 
+    'aliases' => [
+        // Alias lainnya ...
+        'View' => Illuminate\Support\Facades\View::class,
+    ],
+
 ];
