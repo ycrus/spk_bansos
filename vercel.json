@@ -29,16 +29,10 @@
         }
     ],
     "env": {
-        "APP_ENV": "production ",
-        "APP_DEBUG": "true",
-        "APP_URL": "https://spk-bansos.vercel.app/",
-        "APP_KEY": "base64:M+Zdg23W2EcQgcMooq6b0d84mTbVvCqkFnY2MkRJoRg=",
-        "APP_CONFIG_CACHE": "/tmp/config.php",
-        "APP_EVENTS_CACHE": "/tmp/events.php",
-        "APP_PACKAGES_CACHE": "/tmp/packages.php",
-        "APP_ROUTES_CACHE": "/tmp/routes.php",
-        "APP_SERVICES_CACHE": "/tmp/services.php",
-        "VIEW_COMPILED_PATH": "/tmp",
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "APP_URL": "https://spk-bansos.vercel.app",
+        "APP_KEY": "base64:GENERATE_NEW_KEY",
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
@@ -46,8 +40,8 @@
         "DB_HOST": "aws-0-ap-southeast-1.pooler.supabase.com",
         "DB_PORT": "6543",
         "DB_DATABASE": "postgres",
-        "DB_USERNAME": "postgres.fgfealmzirggrvdwghfh",
-        "DB_PASSWORD": "Crusc@14121995"
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "NEW_PASSWORD_HERE"
     },
     "outputDirectory": "public"
 }
