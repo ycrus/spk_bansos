@@ -32,7 +32,7 @@
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "APP_URL": "https://spk-bansos.vercel.app",
-        "APP_KEY": "base64:GENERATE_NEW_KEY",
+        "APP_KEY": "base64:6wa9LCds5F08f3H2WGDnRYcJgpI9ANZm3L9EuXHSpRc=",
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
