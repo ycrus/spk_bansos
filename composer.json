@@ -6,6 +6,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bref/bref": "^2.4",
+        "bref/laravel-bridge": "^2.5",
         "calebporzio/sushi": "^2.4",
         "filament/filament": "3.2.57",
         "laravel/framework": "^11.9",
