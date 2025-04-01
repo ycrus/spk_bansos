@@ -8,20 +8,8 @@
     },
     "routes": [
         {
-            "src": "/images/(.*)",
-            "dest": "/public/images/"
-        },
-        {
             "src": "/css/(.*)",
             "dest": "/public/css/"
-        },
-        {
-            "src": "/js/(.*)",
-            "dest": "/public/js/"
-        },
-        {
-            "src": "/build/(.*)",
-            "dest": "/public/build/"
         },
         {
             "src": "/(.*)",
