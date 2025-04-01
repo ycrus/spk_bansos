@@ -5,44 +5,43 @@
         "api/index.php": {
             "runtime": "vercel-php@0.6.0"
         }
-    }
-},
-"routes": [
-    {
-        "src": "/images/(.*)",
-        "dest": "/public/images/"
     },
-    {
-        "src": "/css/(.*)",
-        "dest": "/public/css/"
+    "routes": [
+        {
+            "src": "/images/(.*)",
+            "dest": "/public/images/"
+        },
+        {
+            "src": "/css/(.*)",
+            "dest": "/public/css/"
+        },
+        {
+            "src": "/js/(.*)",
+            "dest": "/public/js/"
+        },
+        {
+            "src": "/build/(.*)",
+            "dest": "/public/build/"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "env": {
+        "APP_ENV": "production",
+        "APP_DEBUG": "false",
+        "APP_URL": "https://spk-bansos.vercel.app",
+        "APP_KEY": "base64:GENERATE_NEW_KEY",
+        "CACHE_DRIVER": "array",
+        "LOG_CHANNEL": "stderr",
+        "SESSION_DRIVER": "cookie",
+        "DB_CONNECTION": "pgsql",
+        "DB_HOST": "aws-0-ap-southeast-1.pooler.supabase.com",
+        "DB_PORT": "6543",
+        "DB_DATABASE": "postgres",
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "NEW_PASSWORD_HERE"
     },
-    {
-        "src": "/js/(.*)",
-        "dest": "/public/js/"
-    },
-    {
-        "src": "/build/(.*)",
-        "dest": "/public/build/"
-    },
-    {
-        "src": "/(.*)",
-        "dest": "/api/index.php"
-    }
-],
-"env": {
-    "APP_ENV": "production",
-    "APP_DEBUG": "false",
-    "APP_URL": "https://spk-bansos.vercel.app",
-    "APP_KEY": "base64:GENERATE_NEW_KEY",
-    "CACHE_DRIVER": "array",
-    "LOG_CHANNEL": "stderr",
-    "SESSION_DRIVER": "cookie",
-    "DB_CONNECTION": "pgsql",
-    "DB_HOST": "aws-0-ap-southeast-1.pooler.supabase.com",
-    "DB_PORT": "6543",
-    "DB_DATABASE": "postgres",
-    "DB_USERNAME": "postgres",
-    "DB_PASSWORD": "NEW_PASSWORD_HERE"
-},
-"outputDirectory": "public"
+    "outputDirectory": "public"
 }
