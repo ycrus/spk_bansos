@@ -130,6 +130,7 @@ return [
          * Package Service Providers...
          */
         App\Providers\AppServiceProvider::class,
+        Illuminate\View\ViewServiceProvider::class,
     ])->toArray(),
 
     'compiled' => env(
