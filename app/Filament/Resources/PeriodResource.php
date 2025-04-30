@@ -3,10 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PeriodResource\Pages;
-use App\Filament\Resources\PeriodResource\RelationManagers;
 use App\Models\Period;
 use App\Models\Program;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -14,8 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PeriodResource extends Resource
 {
@@ -30,9 +26,12 @@ class PeriodResource extends Resource
                 TextInput::make('name')->required(),
                 Select::make('program_id')
                     ->label('Program')
-                    ->options(Program::all()->pluck('name', 'id'))
+                    ->options(Program::whereNull('deleted_at')->pluck('name', 'id'))
                     ->searchable()
-                    ->required(),
+                    ->required()
+                    ->rules([
+                        'exists:programs,id,deleted_at,NULL'
+                    ]),
                 Select::make('status')
                     ->label('Status')
                     ->options([
@@ -63,6 +62,7 @@ class PeriodResource extends Resource
 
             ])
             ->filters([
+                // TrashedFilter::make(),
                 //
             ])
             ->actions([

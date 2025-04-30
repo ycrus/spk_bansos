@@ -20,7 +20,7 @@ class Penilaian extends Model
 
     public function period()
     {
-        return  $this->belongsTo(Period::class, 'period_id');
+        return  $this->belongsTo(Period::class, 'period_id')->withTrashed();
     }
 
 

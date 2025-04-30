@@ -27,7 +27,7 @@ class PenilaianResource extends Resource
 {
     protected static ?string $model = Penilaian::class;
 
-    protected static ?string $navigationIcon = 'heroicon-m-numbered-list';
+    protected static ?string $navigationIcon = 'heroicon-o-document-plus';
 
     public static function form(Form $form): Form
     {

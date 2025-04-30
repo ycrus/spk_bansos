@@ -27,7 +27,7 @@ class ResultResource extends Resource
 {
     protected static ?string $model = Penilaian::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-check';
     protected static ?string $navigationLabel = 'Result';
 
     public static function getBreadcrumb(): string

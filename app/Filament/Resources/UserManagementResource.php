@@ -7,6 +7,7 @@ use App\Filament\Resources\UserManagementResource\RelationManagers;
 use App\Models\User;
 use App\Models\UserManagement;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -20,7 +21,7 @@ class UserManagementResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-plus';
 
     public static function form(Form $form): Form
     {
@@ -28,6 +29,14 @@ class UserManagementResource extends Resource
             ->schema([
                 TextInput::make('name'),
                 TextInput::make('email'),
+                Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        true => 'Active',
+                        false => 'Not Active',
+                    ])
+                    ->default(true) // Set default value to Active (true)
+                    ->required(),
                 //
             ]);
     }
