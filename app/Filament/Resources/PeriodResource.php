@@ -26,7 +26,7 @@ class PeriodResource extends Resource
                 TextInput::make('name')->required(),
                 Select::make('program_id')
                     ->label('Program')
-                    ->options(Program::whereNull('deleted_at')->pluck('name', 'id'))
+                    ->options(Program::where('deleted_at', null)->pluck('name', 'id'))
                     ->searchable()
                     ->required()
                     ->rules([

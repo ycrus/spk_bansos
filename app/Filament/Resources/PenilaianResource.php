@@ -59,6 +59,11 @@ class PenilaianResource extends Resource
                 TextColumn::make('jumlah_penerima'),
                 TextColumn::make('status'),
             ])
+            ->recordUrl(function ($record) {
+                return $record->status === 'Active'
+                    ? static::getUrl('edit', ['record' => $record])
+                    : null; // null = tidak bisa diklik
+            })
             ->filters([
                 //
             ])
