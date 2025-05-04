@@ -2,6 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/hello', function () {
-//     return view('beranda');
-// });
+Route::get('/', function () {
+    return redirect('/admin'); // Ganti '/admin' sesuai prefix panel Filament-mu
+});

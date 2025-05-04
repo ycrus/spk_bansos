@@ -27,7 +27,7 @@ class PenilaianResource extends Resource
 {
     protected static ?string $model = Penilaian::class;
 
-    protected static ?string $navigationIcon = 'heroicon-m-numbered-list';
+    protected static ?string $navigationIcon = 'heroicon-o-document-plus';
 
     public static function form(Form $form): Form
     {
@@ -59,6 +59,11 @@ class PenilaianResource extends Resource
                 TextColumn::make('jumlah_penerima'),
                 TextColumn::make('status'),
             ])
+            ->recordUrl(function ($record) {
+                return $record->status === 'Active'
+                    ? static::getUrl('edit', ['record' => $record])
+                    : null; // null = tidak bisa diklik
+            })
             ->filters([
                 //
             ])

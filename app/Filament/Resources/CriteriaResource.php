@@ -21,7 +21,7 @@ class CriteriaResource extends Resource
 
     public static ?string $pluralModelLabel = 'Criteria';
 
-    protected static ?string $navigationIcon = 'heroicon-m-chart-pie';
+    protected static ?string $navigationIcon = 'heroicon-o-chart-pie';
 
     public static function form(Form $form): Form
     {

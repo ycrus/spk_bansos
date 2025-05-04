@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PeriodResource\Pages;
-use App\Models\Period;
-use App\Models\Program;
+use App\Filament\Resources\UserManagementResource\Pages;
+use App\Filament\Resources\UserManagementResource\RelationManagers;
+use App\Models\User;
+use App\Models\UserManagement;
+use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -12,26 +14,21 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PeriodResource extends Resource
+class UserManagementResource extends Resource
 {
-    protected static ?string $model = Period::class;
+    protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static ?string $navigationIcon = 'heroicon-o-user-plus';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
-                Select::make('program_id')
-                    ->label('Program')
-                    ->options(Program::where('deleted_at', null)->pluck('name', 'id'))
-                    ->searchable()
-                    ->required()
-                    ->rules([
-                        'exists:programs,id,deleted_at,NULL'
-                    ]),
+                TextInput::make('name'),
+                TextInput::make('email'),
                 Select::make('status')
                     ->label('Status')
                     ->options([
@@ -40,8 +37,7 @@ class PeriodResource extends Resource
                     ])
                     ->default(true) // Set default value to Active (true)
                     ->required(),
-                TextInput::make('description')
-                    ->required(),
+                //
             ]);
     }
 
@@ -49,20 +45,16 @@ class PeriodResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
-                TextColumn::make('program.name'),
+                TextColumn::make('name'),
+                TextColumn::make('email'),
+                TextColumn::make('role'),
                 TextColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn($state) => $state ? 'Active' : 'Not Active')
                     ->sortable(),
-
+                //
             ])
             ->filters([
-                // TrashedFilter::make(),
                 //
             ])
             ->actions([
@@ -85,9 +77,9 @@ class PeriodResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPeriods::route('/'),
-            'create' => Pages\CreatePeriod::route('/create'),
-            'edit' => Pages\EditPeriod::route('/{record}/edit'),
+            'index' => Pages\ListUserManagement::route('/'),
+            'create' => Pages\CreateUserManagement::route('/create'),
+            'edit' => Pages\EditUserManagement::route('/{record}/edit'),
         ];
     }
 }
