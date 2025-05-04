@@ -17,7 +17,7 @@ class Penilaian extends Model
         'jumlah_penerima'
     ];
 
-
+    
     public function period()
     {
         return  $this->belongsTo(Period::class, 'period_id');

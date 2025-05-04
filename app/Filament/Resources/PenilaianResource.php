@@ -69,13 +69,23 @@ class PenilaianResource extends Resource
                     ->label('START')
                     // ->url(fn($record) => "localhost:8080/api/spk/calculate/start/{$record->id}")
                     // ->url(fn($record) => config('services.api.surrounding_url') . "/api/spk/calculate/start/{$record->id}")
-                    ->action(function ($record) {
-                        // Lakukan aksi seperti memanggil API atau kalkulasi
-                        Http::get('http://localhost:8080/api/spk/calculate/start/' . $record->id);
+                    // ->action(function ($record) {
+                    //     // Lakukan aksi seperti memanggil API atau kalkulasi
+                    //     Http::get('http://localhost:8080/api/spk/calculate/start/' . $record->id);
 
-                        // Aksi setelah kalkulasi, bisa langsung refresh halaman atau beri notifikasi
+                    //     // Aksi setelah kalkulasi, bisa langsung refresh halaman atau beri notifikasi
+                    //     session()->flash('success', 'Calculation started');
+                    // })
+                    ->action(function ($record) {
+                        // Resolve service dari container
+                        $service = app(\App\Services\PenilaianServices::class);
+                    
+                        // Panggil method dari service
+                        $service->startCalculate($record->id);
+                    
+                        // Flash message atau feedback
                         session()->flash('success', 'Calculation started');
-                    })
+                    })                    
                     ->color('red')
                     ->icon('heroicon-o-link')
                     ->visible(fn($record) => $record->status === 'Active'),
