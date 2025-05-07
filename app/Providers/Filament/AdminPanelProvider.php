@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([DashboardWidget::class])
+            // ->widgets([DashboardWidget::class])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -53,7 +53,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->sidebarCollapsibleOnDesktop()
-            ->brandName('Sistem Pendukung Keputusan')
+            ->brandName('SPK Bantuan Sosial')
             ->colors([
                 'primary' => Color::Blue, // Set your choice of colors
             ])

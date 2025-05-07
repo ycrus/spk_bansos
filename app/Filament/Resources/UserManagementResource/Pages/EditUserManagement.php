@@ -5,6 +5,11 @@ namespace App\Filament\Resources\UserManagementResource\Pages;
 use App\Filament\Resources\UserManagementResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Pages\Actions\Action;
+use Illuminate\Support\Str;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\TextInput;
+use Illuminate\Support\Facades\Hash;
 
 class EditUserManagement extends EditRecord
 {
@@ -14,6 +19,28 @@ class EditUserManagement extends EditRecord
     {
         return [
             Actions\DeleteAction::make(),
+            Action::make('resetPassword')
+                ->label('Reset Password')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->form([
+                    TextInput::make('new_password')
+                        ->label('Password Baru')
+                        ->password()
+                        ->required()
+                        ->minLength(6),
+                ])
+                ->action(function (array $data) {
+                    $this->record->update([
+                        'password' => Hash::make($data['new_password']),
+                    ]);
+
+                    Notification::make()
+                        ->title('Password berhasil direset')
+                        ->body('Password baru telah disimpan.')
+                        ->success()
+                        ->send();
+                }),
         ];
     }
 }

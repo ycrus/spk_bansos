@@ -84,11 +84,11 @@ class ParameterResource extends Resource
                 //     ->weight('medium')
                 //     ->alignLeft(),
 
-                TextColumn::make('description')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
+                // TextColumn::make('description')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->weight('medium')
+                //     ->alignLeft(),
 
                 TextColumn::make('parameter_weight')
                     ->searchable()
@@ -128,5 +128,15 @@ class ParameterResource extends Resource
             'create' => Pages\CreateParameter::route('/create'),
             'edit' => Pages\EditParameter::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin']);
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin']);
     }
 }

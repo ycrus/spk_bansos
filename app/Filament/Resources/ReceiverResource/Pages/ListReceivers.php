@@ -14,9 +14,9 @@ class ListReceivers extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('Add') // Ubah label
-                ->icon('heroicon-o-plus') // Tambahkan ikon
-                ->color('success') // Warna tombol,,
+                ->label('Create') // Ubah label
+                // ->icon('heroicon-o-plus') // Tambahkan ikon
+                ->color('primary') // Warna tombol,,
         ];
     }
 }
