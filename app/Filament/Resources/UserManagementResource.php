@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\UserManagementResource\Pages;
 use App\Filament\Resources\UserManagementResource\RelationManagers;
 use App\Models\User;
+use App\Models\Roles;
 use App\Models\UserManagement;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -16,6 +17,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Actions\Action;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash; 
 
 class UserManagementResource extends Resource
 {
@@ -28,7 +32,29 @@ class UserManagementResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name'),
+
                 TextInput::make('email'),
+
+                TextInput::make('password')
+                    ->password()
+                    ->label('Password')
+                    ->required(fn (string $context) => $context === 'create')
+                    ->visible(fn (string $context) => $context === 'create')
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->confirmed(),
+
+                TextInput::make('password_confirmation')
+                    ->label('Konfirmasi Password')
+                    ->password()
+                    ->required(fn (string $context) => $context === 'create')
+                    ->visible(fn (string $context) => $context === 'create'),
+
+                Select::make('role')
+                    ->label('Role')
+                    ->options(Roles::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->required(),
+
                 Select::make('status')
                     ->label('Status')
                     ->options([
@@ -38,7 +64,8 @@ class UserManagementResource extends Resource
                     ->default(true) // Set default value to Active (true)
                     ->required(),
                 //
-            ]);
+            ])
+            ;
     }
 
     public static function table(Table $table): Table
@@ -47,7 +74,8 @@ class UserManagementResource extends Resource
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),
-                TextColumn::make('role'),
+                TextColumn::make('userRole.name')
+                ->label('Role'),
                 TextColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn($state) => $state ? 'Active' : 'Not Active')
@@ -82,4 +110,15 @@ class UserManagementResource extends Resource
             'edit' => Pages\EditUserManagement::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin']);
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin']);
+    }
+
 }

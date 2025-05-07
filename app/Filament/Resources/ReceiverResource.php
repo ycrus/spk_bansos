@@ -203,4 +203,14 @@ class ReceiverResource extends Resource
             'edit' => Pages\EditReceiver::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin', 'Staff Desa']);
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin', 'Staff Desa']);
+    }
 }

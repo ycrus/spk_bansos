@@ -131,4 +131,14 @@ class ProgramResource extends Resource
             'edit' => Pages\EditProgram::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin']);
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole(['Super Admin']);
+    }
 }
