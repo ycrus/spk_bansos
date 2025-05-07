@@ -6,6 +6,7 @@ use App\Filament\Resources\UserManagementResource\Pages;
 use App\Filament\Resources\UserManagementResource\RelationManagers;
 use App\Models\User;
 use App\Models\Roles;
+use App\Models\Kelurahan;
 use App\Models\UserManagement;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Actions\Action;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash; 
+use Filament\Pages\Actions;
 
 class UserManagementResource extends Resource
 {
@@ -33,7 +35,24 @@ class UserManagementResource extends Resource
             ->schema([
                 TextInput::make('name'),
 
-                TextInput::make('email'),
+                TextInput::make('email')
+                    ->label('Email')
+                    ->email()
+                    ->required()
+                    ->rule(function ($livewire) {
+                        return function (string $attribute, $value, $fail) use ($livewire) {
+                            $userId = $livewire->record?->id;
+
+                            $exists = User::where('email', $value)
+                                ->where('status', true)
+                                ->when($userId, fn ($query) => $query->where('id', '!=', $userId))
+                                ->exists();
+
+                            if ($exists) {
+                                $fail('Sudah ada user aktif dengan email ini.');
+                            }
+                        };
+                    }),
 
                 TextInput::make('password')
                     ->password()
@@ -53,7 +72,29 @@ class UserManagementResource extends Resource
                     ->label('Role')
                     ->options(Roles::all()->pluck('name', 'id'))
                     ->searchable()
-                    ->required(),
+                    ->required()
+                    ->reactive(),
+
+                Select::make('desa')
+                    ->label('Desa')
+                    ->options(Kelurahan::all()->pluck('name', 'id'))
+                    ->searchable()
+                    ->required()
+                    ->visible(fn ($get) => in_array($get('role'), [4]))
+                    ->rule(function ($get, $livewire) {
+                        return function ($attribute, $value, $fail) use ($livewire) {
+                            $userId = $livewire->record?->id;
+
+                            $existing = User::where('desa', $value)
+                                ->where('status', true)
+                                ->when($userId, fn ($query) => $query->where('id', '!=', $userId)) 
+                                ->exists();
+                
+                            if ($existing) {
+                                $fail('Sudah ada user aktif untuk desa ini.');
+                            }
+                        };
+                    }),
 
                 Select::make('status')
                     ->label('Status')
@@ -76,6 +117,8 @@ class UserManagementResource extends Resource
                 TextColumn::make('email'),
                 TextColumn::make('userRole.name')
                 ->label('Role'),
+                TextColumn::make('desaStaf.name')
+                ->label('Desa'), 
                 TextColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn($state) => $state ? 'Active' : 'Not Active')
@@ -119,6 +162,15 @@ class UserManagementResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->user()?->hasRole(['Super Admin']);
+    }
+
+    public static function create(Request $request)
+    {
+        // Membuat record baru
+        $record = parent::create($request);
+
+        // Redirect ke halaman index setelah create berhasil
+        return redirect()->route('filament.resources.usermanagement.index');
     }
 
 }

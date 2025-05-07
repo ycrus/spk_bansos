@@ -57,6 +57,9 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue, // Set your choice of colors
             ])
+            ->renderHook('panels::header.heading', function () {
+                return 'Selamat Datang';
+            })
         ;
     }
 }

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'role',
         'password',
         'status',
+        'desa',
     ];
 
     /**
@@ -51,6 +52,11 @@ class User extends Authenticatable
     public function userRole()
     {
         return  $this->belongsTo(Roles::class, 'role');
+    }
+
+    public function desaStaf()
+    {
+        return  $this->belongsTo(Kelurahan::class, 'desa');
     }
 
     public function hasRole(string|array $roles): bool

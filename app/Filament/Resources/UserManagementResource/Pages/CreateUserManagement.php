@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Pages\Actions\CreateAction;
 use Filament\Actions\Action;
+use Illuminate\Http\RedirectResponse;
 
 class CreateUserManagement extends CreateRecord
 {
@@ -15,7 +16,11 @@ class CreateUserManagement extends CreateRecord
     protected function getFormActions(): array
     {
         return [
-            CreateAction::make(),
+            Action::make('create')
+                ->label('Create')
+                ->submit('create')
+                ->color('primary'),
+
             Action::make('cancel')
                 ->label('Cancel')
                 ->color('danger')
@@ -24,4 +29,10 @@ class CreateUserManagement extends CreateRecord
                 ,
         ];
     }
+
+    protected function getRedirectUrl():string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
 }
