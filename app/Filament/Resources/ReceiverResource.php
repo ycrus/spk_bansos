@@ -3,21 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReceiverResource\Pages;
-use App\Filament\Resources\ReceiverResource\RelationManagers;
 use App\Models\Kelurahan;
 use App\Models\Parameter;
 use App\Models\Receiver;
-use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\Action;
+
 
 class ReceiverResource extends Resource
 {
@@ -93,6 +93,7 @@ class ReceiverResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn ($record) => Pages\ViewReceivers::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('nama')
                     ->searchable()
@@ -109,11 +110,6 @@ class ReceiverResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
-                // TextColumn::make('umur')
-                //     ->searchable()
-                //     ->sortable()
-                //     ->weight('medium')
-                //     ->alignLeft(),
                 TextColumn::make('pekerjaan')
                     ->searchable()
                     ->sortable()
@@ -174,12 +170,50 @@ class ReceiverResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Approved' => 'success',
+                        'Need Approval' => 'warning',
+                        'Rejected' => 'danger',
+                    })
             ])
             ->filters([
-                //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
+                Action::make('approveReject')
+                ->label('Tinjau')
+                ->icon('heroicon-o-check-circle')
+                ->color('primary') // 'success', 'danger', 'warning', 'secondary', 'gray', 'info'
+                ->iconPosition('after') // atau 'after'
+                ->visible(fn ($record) => $record->status === 'Need Approval')
+                ->button() // default button
+                ->form([Radio::make('status')
+                        ->options([
+                                    'Approved' => 'Approve',
+                                    'Rejected' => 'Reject'
+                                    ])
+                        ->inline()
+                        ->required()
+                        ->reactive() // WAJIB untuk memungkinkan kondisi dinamis
+                        ->afterStateUpdated(fn ($state, callable $set) => $state !== 'Rejected' ? $set('note', null) : null)
+                        ->extraAttributes(fn ($state) => [
+                            'class' => match ($state) {
+                                'Approved' => 'text-green-600',
+                                'Rejected' => 'text-red-600',
+                                default => '',
+                            },
+                        ]),
+                        Textarea::make('note')
+                        ->label('Catatan')
+                        ->visible(fn ($get) => $get('status') === 'Rejected')
+                ])
+                ->action(function (array $data, $record) {
+                    $record->status = $data['status'];
+                    $record->save();
+                })
+                
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -201,6 +235,7 @@ class ReceiverResource extends Resource
             'index' => Pages\ListReceivers::route('/'),
             'create' => Pages\CreateReceiver::route('/create'),
             'edit' => Pages\EditReceiver::route('/{record}/edit'),
+            'view' => Pages\ViewReceivers::route('/{record}'),
         ];
     }
 

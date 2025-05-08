@@ -15,7 +15,10 @@ class CreateProgram extends CreateRecord
     protected function getFormActions(): array
     {
         return [
-            CreateAction::make(),
+            Action::make('create')
+                ->label('Create')
+                ->submit('create')
+                ->color('primary'),
             Action::make('cancel')
                 ->label('Cancel')
                 ->color('danger')
@@ -23,5 +26,10 @@ class CreateProgram extends CreateRecord
                 // ->icon('heroicon-m-x-mark')
                 ,
         ];
+    }
+
+    protected function getRedirectUrl():string
+    {
+        return $this->getResource()::getUrl('index');
     }
 }

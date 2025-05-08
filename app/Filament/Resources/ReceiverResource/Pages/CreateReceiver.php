@@ -15,7 +15,11 @@ class CreateReceiver extends CreateRecord
     protected function getFormActions(): array
     {
         return [
-            CreateAction::make(),
+            Action::make('create')
+                ->label('Create')
+                ->submit('create')
+                ->color('primary'),
+                
             Action::make('cancel')
                 ->label('Cancel')
                 ->color('danger')

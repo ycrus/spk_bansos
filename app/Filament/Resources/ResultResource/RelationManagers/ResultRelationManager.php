@@ -3,16 +3,16 @@
 namespace App\Filament\Resources\ResultResource\RelationManagers;
 
 use App\Filament\Exports\ResultExporter;
+use App\Models\Result;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\BooleanColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\Action;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ResultRelationManager extends RelationManager
 {
@@ -52,11 +52,13 @@ class ResultRelationManager extends RelationManager
             ->filters([])
             ->headerActions([
                 ExportAction::make()
-                    ->exporter(ResultExporter::class)
+                    ->exporter(ResultExporter::class),
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+               
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

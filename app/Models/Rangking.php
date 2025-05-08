@@ -12,7 +12,7 @@ class Rangking extends Model
     protected $fillable = [
         'penilaian_id',
         'receiver_id',
-        'rangking',
+        'ranking',
         'total',
         'is_ranked',
         'status',
@@ -21,6 +21,11 @@ class Rangking extends Model
     public function penerima()
     {
         return  $this->belongsTo(Receiver::class, 'receiver_id');
+    }
+
+    public function penilaian()
+    {
+        return  $this->belongsTo(Penilaian::class, 'penilaian_id');
     }
 
     public function getIsBansosStatus()

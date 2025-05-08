@@ -39,66 +39,72 @@ class NilaiParameterRelationManager extends RelationManager
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('pekerjaan')
+                ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->alignLeft(),
+                    ->alignCenter(),
                 TextColumn::make('penghasilan')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('medium')
-                    ->alignLeft(),
-                TextColumn::make('status_tempat_tinggal')
+                    // ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('status_perkawinan')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('jumlah_tanggungan')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('status_tempat_tinggal')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('keadaan_rumah')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('disabilitas')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('pendidikan')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('fasilitas_mck')
+                ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('bahan_bakar_harian')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('kepemilikan_kendaraan')
+                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
-            ])
+                                ])
             ->filters([
                 //
             ])

@@ -18,6 +18,7 @@ class Program extends Model
     protected $table = 'programs';
     protected $fillable = [
         'name',
+        'is_active',
     ];
 
     public function criterias(): BelongsToMany

@@ -2,12 +2,18 @@
 
 namespace App\Services;
 
+use App\Models\Calculate_Receiver;
 use App\Models\Penilaian;
 use App\Models\Period;
-use App\Models\ProgramCriteria;
-use App\Models\CalculateReceiver;
+use App\Models\Program_Criteria;
 use App\Models\Receiver;
 use App\Models\Criteria;
+use App\Models\NilaiAkhir;
+use App\Models\NilaiBobot;
+use App\Models\NilaiUtility;
+use App\Models\Rangking;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 
 class PenilaianService
 {
@@ -18,16 +24,16 @@ class PenilaianService
             return null;
         }
 
-        $penilaian->status = 'In Progress';
-        $penilaian->save();
+        // $penilaian->status = 'In Progress';
+        // $penilaian->save();
 
         $period = Period::find($penilaian->period_id);
         if (!$period) {
             return null;
         }
 
-        $programCriteria = ProgramCriteria::where('program_id', $period->program_id)->get();
-        $calculateReceivers = CalculateReceiver::where('penilaian_id', $id)->get();
+        $programCriteria = Program_Criteria::where('program_id', $period->program_id)->get();
+        $calculateReceivers = Calculate_Receiver::where('penilaian_id', $id)->get();
 
         $criteria = [];
         foreach ($programCriteria as $item) {
@@ -59,7 +65,7 @@ class PenilaianService
     }
 
     // Tambahkan implementasi fungsi-fungsi di bawah ini sesuai kebutuhan
-    private function setParameterWeight($id, $users, $criteria) { // Mapping: nama kriteria => nama field pada model Receiver dan NilaiBobot
+    private function setParameterWeight($penilaianId, $users, $criteria) { // Mapping: nama kriteria => nama field pada model Receiver dan NilaiBobot
         $fieldMap = [
             'Penghasilan' => 'penghasilan',
             'Status Tempat Tinggal' => 'status_tempat_tinggal',
@@ -100,8 +106,8 @@ class PenilaianService
         } 
     }
 
-    private function setUtilityValue($id, $users, $criteria) { 
-        foreach ($receivers as $receiver) {
+    private function setUtilityValue($penilaianId, $users, $criteria) { 
+        foreach ($users as $receiver) {
             $bobotUser = new NilaiUtility();
             $bobotUser->penilaian_id = $penilaianId;
             $bobotUser->receiver_id = $receiver->id;
@@ -148,8 +154,8 @@ class PenilaianService
         }
     }
 
-    private function setNilaiAkhir($id, $users, $criteria, $programId) { 
-        foreach ($receivers as $receiver) {
+    private function setNilaiAkhir($penilaianId, $users, $criteria, $programId) { 
+        foreach ($users as $receiver) {
             $nilaiBobot = NilaiUtility::where('receiver_id', $receiver->id)
                                       ->where('penilaian_id', $penilaianId)
                                       ->first();
@@ -190,7 +196,7 @@ class PenilaianService
     $criteriaData = Criteria::where('title', $criterion)->first();
     if (!$criteriaData) return;
 
-    $getCriteriaWeight = ProgramCriteria::where('program_id', $programId)
+    $getCriteriaWeight = Program_Criteria::where('program_id', $programId)
                                         ->where('criteria_id', $criteriaData->id)
                                         ->first();
     if (!$getCriteriaWeight) return;
@@ -241,8 +247,13 @@ private function calculateUtility(NilaiUtility $nilaiBobot, $criterion, $weight)
             break;
     }
 
-    // Calculate utility as per weight (round to 2 decimal places)
-    return $value * (BigDecimal::valueOf($weight) / 100)->round(2, PHP_ROUND_HALF_DOWN);
+            $result = BigDecimal::of($value)
+            ->multipliedBy(
+                BigDecimal::of($weight)->dividedBy(100, 2, RoundingMode::HALF_DOWN)
+            )
+            ->toScale(2, RoundingMode::HALF_DOWN); // jika ingin hasil akhir dibulatkan juga
+
+        return $result;
 }
 
      
@@ -250,12 +261,12 @@ private function calculateUtility(NilaiUtility $nilaiBobot, $criterion, $weight)
         $rankings = [];
 
         foreach ($users as $user) {
-            $ranking = new Ranking();
+            $ranking = new Rangking();
             $ranking->penilaian_id = $id;
             $ranking->receiver_id = $user->id;
     
             // Ambil nilai total untuk masing-masing penerima
-            $total = BigDecimal::ZERO;
+            $total = BigDecimal::zero();
     
             $totalValue = NilaiAkhir::where('receiver_id', $user->id)
                                     ->where('penilaian_id', $id)
@@ -274,12 +285,23 @@ private function calculateUtility(NilaiUtility $nilaiBobot, $criterion, $weight)
     
         foreach ($rankedList as $index => $rank) {
             $rank->ranking = $index + 1;
-            $rank->is_ranked = $index < $penerima;
+            $rank->is_ranked = $index < $jumlahPenerima;
             $rank->status = $rank->is_ranked ? 'Yes' : 'No';
+
+            Rangking::updateOrCreate(
+                ['receiver_id' => $rank->receiver_id, 'penilaian_id' => $rank->penilaian_id], // Kondisi pencarian
+                [
+                    'ranking' => $rank->ranking,
+                    'total' => $rank->total,  // Jangan lupa untuk mengisi field 'total'
+                    'is_ranked' => $rank->is_ranked,
+                    'status' => $rank->status
+                ]
+            );
         }
     
         // Simpan semua ranking ke database
-        Ranking::upsert($rankedList->toArray(), ['penilaian_id', 'receiver_id']);
+        // Rangking::upsert($rankedList->toArray(), ['penilaian_id', 'receiver_id']);
+       
     }
 
     private function calculateTotal(NilaiAkhir $nilaiAkhir)

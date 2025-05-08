@@ -16,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\ActionGroup;
 
 class ParameterResource extends Resource
 {
@@ -33,20 +34,6 @@ class ParameterResource extends Resource
                 TextInput::make('description'),
                 TextInput::make('parameter_weight')
                     ->numeric(),
-                // Select::make('operation')
-                //     ->options([
-                //         'Kurang Dari' => 'Kurang Dari',
-                //         'Kurang Dari Sama Dengan' => 'Kurang Dari Sama Dengan',
-                //         'Lebih Dari Sama Dengan' => 'Lebih Dari Sama Dengan',
-                //         'Lebih Dari' => 'Lebih Dari',
-                //         'Sama Dengan' => 'Sama Dengan',
-                //         'Sampai' => 'Sampai',
-                //     ])
-                //     ->native(false),
-                // TextInput::make('start'),
-                // TextInput::make('end'),
-                // TextInput::make('unit'),
-
                 Select::make('criteria_id')
                     ->label('Criteria')
                     ->options(Criteria::all()->pluck('title', 'id'))
@@ -64,32 +51,6 @@ class ParameterResource extends Resource
                     ->weight('medium')
                     ->alignLeft(),
 
-                // TextColumn::make('operation')
-                //     ->sortable()
-                //     ->weight('medium')
-                //     ->alignLeft(),
-
-                // TextColumn::make('start')
-                //     ->sortable()
-                //     ->weight('medium')
-                //     ->alignLeft(),
-
-                // TextColumn::make('end')
-                //     ->sortable()
-                //     ->weight('medium')
-                //     ->alignLeft(),
-
-                // TextColumn::make('unit')
-                //     ->sortable()
-                //     ->weight('medium')
-                //     ->alignLeft(),
-
-                // TextColumn::make('description')
-                //     ->searchable()
-                //     ->sortable()
-                //     ->weight('medium')
-                //     ->alignLeft(),
-
                 TextColumn::make('parameter_weight')
                     ->searchable()
                     ->sortable()
@@ -103,9 +64,11 @@ class ParameterResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

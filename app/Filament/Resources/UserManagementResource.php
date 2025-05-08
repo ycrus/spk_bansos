@@ -3,12 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserManagementResource\Pages;
-use App\Filament\Resources\UserManagementResource\RelationManagers;
 use App\Models\User;
 use App\Models\Roles;
 use App\Models\Kelurahan;
-use App\Models\UserManagement;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -16,12 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Forms\Components\Actions\Action;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash; 
-use Filament\Pages\Actions;
 
 class UserManagementResource extends Resource
 {
@@ -151,6 +143,7 @@ class UserManagementResource extends Resource
             'index' => Pages\ListUserManagement::route('/'),
             'create' => Pages\CreateUserManagement::route('/create'),
             'edit' => Pages\EditUserManagement::route('/{record}/edit'),
+            
         ];
     }
 

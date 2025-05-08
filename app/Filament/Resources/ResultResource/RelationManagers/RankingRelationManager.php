@@ -37,7 +37,7 @@ class RankingRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('total')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('rangking')
+                Tables\Columns\TextColumn::make('ranking')
                     ->searchable()
                     ->sortable(),
             ])
