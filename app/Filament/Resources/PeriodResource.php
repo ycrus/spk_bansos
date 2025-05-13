@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class PeriodResource extends Resource
@@ -23,23 +24,26 @@ class PeriodResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
+                TextInput::make('name')
+                    ->required()
+                    ->unique(table: 'periods', column: 'name', ignoreRecord: true),
                 Select::make('program_id')
                     ->label('Program')
-                    ->options(Program::where('deleted_at', null)->pluck('name', 'id'))
+                    ->options(
+                        Program::where('is_active', true)
+                        ->whereNull('deleted_at')
+                        ->pluck('name', 'id')
+                    )
                     ->searchable()
                     ->required()
                     ->rules([
                         'exists:programs,id,deleted_at,NULL'
                     ]),
-                Select::make('status')
+                TextInput::make('status')
                     ->label('Status')
-                    ->options([
-                        true => 'Active',
-                        false => 'Not Active',
-                    ])
-                    ->default(true) // Set default value to Active (true)
-                    ->required(),
+                    ->default('Active') 
+                    ->disabled()
+                    ->dehydrated(),
                 TextInput::make('description')
                     ->required(),
             ]);
@@ -54,19 +58,25 @@ class PeriodResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
-                TextColumn::make('program.name'),
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->formatStateUsing(fn($state) => $state ? 'Active' : 'Not Active')
+                TextColumn::make('program.name')
+                    ->searchable()
                     ->sortable(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Active' => 'success',
+                        'Review' => 'warning',
+                        'Done' => 'success',
+                    }),
 
             ])
             ->filters([
-                // TrashedFilter::make(),
-                //
+                SelectFilter::make('status')
+                ->options(fn () => Period::query()->distinct()->pluck('status', 'status'))
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->visible(fn($record) => $record->status === 'Active'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -88,16 +98,17 @@ class PeriodResource extends Resource
             'index' => Pages\ListPeriods::route('/'),
             'create' => Pages\CreatePeriod::route('/create'),
             'edit' => Pages\EditPeriod::route('/{record}/edit'),
+            'view' => Pages\ViewPeriods::route('/{record}'),
         ];
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 }

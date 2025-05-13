@@ -13,13 +13,14 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
-use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class ProgramResource extends Resource
@@ -35,7 +36,13 @@ class ProgramResource extends Resource
                 Group::make()->schema([
                     Section::make('Program')
                         ->schema([
-                            TextInput::make('name'),
+                            TextInput::make('name')
+                                ->required()
+                                ->unique(table: 'receivers', column: 'nik', ignoreRecord: true),
+                            Toggle::make('is_active')
+                                ->label('Status')
+                                ->inline()
+                                ->required(),
                         ]),
                 ]),
                 Group::make()->schema([
@@ -103,8 +110,15 @@ class ProgramResource extends Resource
                     ->label('Status'),
             ])
             ->filters([
-                TrashedFilter::make(),
-                //
+                SelectFilter::make('is_active')
+                    ->options(fn () => Program::query()
+                        ->select('is_active')
+                        ->distinct()
+                        ->get()
+                        ->mapWithKeys(fn ($item) => [
+                        $item->is_active => $item->is_active ? 'Active' : 'Non Active',
+                        ])
+                        )           
             ])
             ->actions([
                 ActionGroup::make([
@@ -133,16 +147,17 @@ class ProgramResource extends Resource
             'index' => Pages\ListPrograms::route('/'),
             'create' => Pages\CreateProgram::route('/create'),
             'edit' => Pages\EditProgram::route('/{record}/edit'),
+            'view' => Pages\ViewPrograms::route('/{record}'),
         ];
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 }

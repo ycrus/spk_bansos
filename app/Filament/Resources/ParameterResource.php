@@ -3,10 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ParameterResource\Pages;
-use App\Filament\Resources\ParameterResource\RelationManagers;
+use App\Filament\Resources\ParameterResource\Pages\ViewParameters;
 use App\Models\Criteria;
 use App\Models\Parameter;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -14,9 +13,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Filters\SelectFilter;
 
 class ParameterResource extends Resource
 {
@@ -44,14 +42,17 @@ class ParameterResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        ->recordUrl(fn ($record) => ViewParameters::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('title')
+                    ->label('Nama')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
 
                 TextColumn::make('parameter_weight')
+                    ->label('Bobot')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
@@ -61,7 +62,7 @@ class ParameterResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('criteria')->relationship('criteria', 'title')
             ])
             ->actions([
                 ActionGroup::make([
@@ -90,16 +91,17 @@ class ParameterResource extends Resource
             'index' => Pages\ListParameters::route('/'),
             'create' => Pages\CreateParameter::route('/create'),
             'edit' => Pages\EditParameter::route('/{record}/edit'),
+            'view' => Pages\ViewParameters::route('/{record}'),
         ];
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan']);
     }
 }

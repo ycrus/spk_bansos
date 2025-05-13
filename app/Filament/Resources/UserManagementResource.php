@@ -8,12 +8,15 @@ use App\Models\Roles;
 use App\Models\Kelurahan;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash; 
+use Illuminate\Database\Eloquent\Builder;
 
 class UserManagementResource extends Resource
 {
@@ -62,7 +65,16 @@ class UserManagementResource extends Resource
 
                 Select::make('role')
                     ->label('Role')
-                    ->options(Roles::all()->pluck('name', 'id'))
+                    ->options(function () {
+                        if (auth()->user()?->hasRole('Admin Kecamatan')) {
+                            return Roles::whereIn('name', [
+                                'Staff Desa',
+                                'Staff Kecamatan',
+                            ])->pluck('name', 'id');
+                        }
+                
+                        return Roles::all()->pluck('name', 'id');
+                    })
                     ->searchable()
                     ->required()
                     ->reactive(),
@@ -104,18 +116,25 @@ class UserManagementResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+
+                if (auth()->user()?->hasRole('Admin Kecamatan')) {
+                    $roles = ['3', '4']; 
+                    return $query->whereIn('role', $roles);
+                }
+            
+                return $query;
+            })
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),
                 TextColumn::make('userRole.name')
-                ->label('Role'),
+                    ->label('Role'),
                 TextColumn::make('desaStaf.name')
-                ->label('Desa'), 
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->formatStateUsing(fn($state) => $state ? 'Active' : 'Not Active')
-                    ->sortable(),
-                //
+                    ->label('Desa'), 
+                ToggleColumn::make('status')
+                    ->label('Status'),
+            
             ])
             ->filters([
                 //
@@ -149,21 +168,12 @@ class UserManagementResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
-    }
-
-    public static function create(Request $request)
-    {
-        // Membuat record baru
-        $record = parent::create($request);
-
-        // Redirect ke halaman index setelah create berhasil
-        return redirect()->route('filament.resources.usermanagement.index');
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan']);
     }
 
 }

@@ -246,14 +246,14 @@ private function calculateUtility(NilaiUtility $nilaiBobot, $criterion, $weight)
             $value = $nilaiBobot->kepemilikan_kendaraan;
             break;
     }
-
-            $result = BigDecimal::of($value)
+    
+    $result = BigDecimal::of($value ?? 0)
             ->multipliedBy(
                 BigDecimal::of($weight)->dividedBy(100, 2, RoundingMode::HALF_DOWN)
             )
-            ->toScale(2, RoundingMode::HALF_DOWN); // jika ingin hasil akhir dibulatkan juga
+            ->toScale(2, RoundingMode::HALF_DOWN); 
 
-        return $result;
+    return $result;
 }
 
      
@@ -265,7 +265,6 @@ private function calculateUtility(NilaiUtility $nilaiBobot, $criterion, $weight)
             $ranking->penilaian_id = $id;
             $ranking->receiver_id = $user->id;
     
-            // Ambil nilai total untuk masing-masing penerima
             $total = BigDecimal::zero();
     
             $totalValue = NilaiAkhir::where('receiver_id', $user->id)
@@ -280,7 +279,6 @@ private function calculateUtility(NilaiUtility $nilaiBobot, $criterion, $weight)
             $rankings[] = $ranking;
         }
     
-        // Urutkan berdasarkan total (descending) dan berikan ranking
         $rankedList = collect($rankings)->sortByDesc('total')->values();
     
         foreach ($rankedList as $index => $rank) {
@@ -298,9 +296,6 @@ private function calculateUtility(NilaiUtility $nilaiBobot, $criterion, $weight)
                 ]
             );
         }
-    
-        // Simpan semua ranking ke database
-        // Rangking::upsert($rankedList->toArray(), ['penilaian_id', 'receiver_id']);
        
     }
 

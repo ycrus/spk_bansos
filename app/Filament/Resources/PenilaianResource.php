@@ -29,16 +29,20 @@ class PenilaianResource extends Resource
                 Select::make('period_id')
                     ->label('Period')
                     ->relationship('period', 'name')
-                    ->options(Period::where('status', true)->pluck('name', 'id'))
+                    ->options(Period::where('status', 'Active')->pluck('name', 'id'))
                     ->searchable()
                     ->required()
                     ->afterStateUpdated(function ($state) {
                         if ($state) {
-                            Period::where('id', $state)->update(['status' => false]);
+                            Period::where('id', $state)->update(['status' => 'Review']);
                         }
                     }),
-                TextInput::make('jumlah_penerima')->required(),
-                TextInput::make('status')->default("Active")->required(),
+                TextInput::make('jumlah_penerima')
+                ->required(),
+                TextInput::make('status')
+                    ->default("Active")
+                    ->disabled()
+                    ->dehydrated(),
 
             ]);
     }
@@ -47,9 +51,17 @@ class PenilaianResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('period.name'),
-                TextColumn::make('jumlah_penerima'),
-                TextColumn::make('status'),
+                TextColumn::make('period.name')
+                    ->sortable(),
+                TextColumn::make('jumlah_penerima')
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Active' => 'success',
+                        'Review' => 'warning',
+                        'Done' => 'primary',
+                    }),
             ])
             ->recordUrl(function ($record) {
                 return $record->status === 'Active'
@@ -70,6 +82,8 @@ class PenilaianResource extends Resource
 
                         $record->status = 'Done';
                         $record->save();
+
+                        Period::where('id', $record->period_id)->update(['status' => 'Done']);
 
                         session()->flash('success', 'Calculation started');
                     })                    
@@ -102,11 +116,11 @@ class PenilaianResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 }

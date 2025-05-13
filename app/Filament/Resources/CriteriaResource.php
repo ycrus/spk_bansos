@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\ToggleColumn;
 
 class CriteriaResource extends Resource
 {
@@ -43,6 +44,9 @@ class CriteriaResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
+
+                ToggleColumn::make('is_active')
+                    ->label('Status'),
 
 
             ])
@@ -79,11 +83,11 @@ class CriteriaResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan']);
     }
 }

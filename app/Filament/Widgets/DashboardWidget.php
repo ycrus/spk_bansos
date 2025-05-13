@@ -2,8 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Period;
-use App\Models\Program;
 use App\Models\Receiver;
 use Filament\Support\Enums\IconPosition;
 use Filament\Widgets\StatsOverviewWidget;
@@ -13,36 +11,49 @@ class DashboardWidget extends StatsOverviewWidget
 {
     protected function getStats(): array
     {
-        $stats = [
-            Stat::make('Total Penerima', Receiver::count())
-                ->description('Total penerima yang terdaftar')
-                ->descriptionIcon('heroicon-m-user-group', IconPosition::Before)
-                ->chart([1, 5, 3, 4, 8, 10])
-                ->color('success'),
-        ];
+        $stats = [];
     
-        if (auth()->user()?->hasRole('Super Admin')) {
-            $stats[] = Stat::make('Total Program', Program::count())
-                ->description('Total Program yang ada')
-                ->descriptionIcon('heroicon-c-cube', IconPosition::Before)
-                ->chart([1, 5, 3, 4, 8, 10])
-                ->color('success');
+        if (auth()->user()?->hasRole('Staff Desa')) {
+            $desaId = auth()->user()?->desa;
+            $desa = auth()->user()?->desaStaf?->name;
+            $stats[] = Stat::make('Total Data Alternatif', Receiver::where('kelurahan', $desaId)->count())
+                        ->description('Total penerima yang terdaftar')
+                        ->descriptionIcon('heroicon-m-user-group', IconPosition::Before)
+                        ->chart([1, 5, 3, 4, 8, 10])
+                        ->color('success');
+                        
+            $stats[] =  Stat::make('Need Approval', Receiver::where('status', 'Need Approval')
+                        ->where('kelurahan', $desaId)->count())
+                        ->description("Jumlah penerima yang menunggu persetujuan {$desa}")
+                        ->descriptionIcon('heroicon-m-clock', \Filament\Support\Enums\IconPosition::Before)
+                        ->chart([2, 4, 3, 5, 6, 7])
+                        ->color('warning');
+
+            $stats[] =  Stat::make('Rejected', Receiver::where('status', 'Rejected')
+                        ->where('kelurahan', $desaId)->count())
+                        ->description('Jumlah penerima rejected')
+                        ->descriptionIcon('heroicon-m-minus-circle', \Filament\Support\Enums\IconPosition::Before)
+                        ->chart([2, 4, 3, 5, 6, 7])
+                        ->color('danger');
+        }else{
+            $stats[] = Stat::make('Total Data Alternatif', Receiver::count())
+                        ->description('Total penerima yang terdaftar')
+                        ->descriptionIcon('heroicon-m-user-group', IconPosition::Before)
+                        ->chart([1, 5, 3, 4, 8, 10])
+                        ->color('success');
+
+            $stats[] =  Stat::make('Need Approval', Receiver::where('status', 'Need Approval')->count())
+                        ->description('Jumlah penerima yang menunggu persetujuan')
+                        ->descriptionIcon('heroicon-m-clock', \Filament\Support\Enums\IconPosition::Before)
+                        ->chart([2, 4, 3, 5, 6, 7])
+                        ->color('warning');
+
+            $stats[] =  Stat::make('Rejected', Receiver::where('status', 'Rejected')->count())
+                        ->description('Jumlah penerima rejected')
+                        ->descriptionIcon('heroicon-m-minus-circle', \Filament\Support\Enums\IconPosition::Before)
+                        ->chart([2, 4, 3, 5, 6, 7])
+                        ->color('danger');
         }
-    
-        $stats[] = Stat::make('Total Period', Period::count())
-            ->description('Total Period yang ada')
-            ->descriptionIcon('heroicon-o-squares-2x2', IconPosition::Before)
-            ->chart([1, 5, 3, 4, 8, 10])
-            ->color('success');
-    
         return $stats;
     }
-    
-
-    // public static function canView(): bool
-    // {
-    //     return auth()->user()?->hasRole(['Super Admin']);
-    // }
-
-
 }

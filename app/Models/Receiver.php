@@ -32,6 +32,7 @@ class Receiver extends Model
         'bahan_bakar_harian',
         'kepemilikan_kendaraan',
         'status',
+        'remark',
     ];
 
     public function umur(): Attribute

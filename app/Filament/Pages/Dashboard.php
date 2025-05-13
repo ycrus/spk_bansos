@@ -6,13 +6,27 @@ use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
 {
+    // $header = '';
+    // if (auth()->user()?->hasRole('Staff Desa')) {
+    // }
 
-    protected ?string $heading = 'Selamat Datang';
+    protected ?string $heading = null;
 
-    protected function getHeaderWidgets(): array
+    public static function getNavigationLabel(): string
     {
-        return [
-            DashboardWidget::class,
-        ];
+        return 'Beranda';
     }
+
+    public function mount(): void
+    {
+        $user = auth()->user()?->name;
+        if (auth()->user()?->hasRole('Staff Desa')){
+            $desa = auth()->user()?->desaStaf?->name;
+            $this->heading = "Selamat Datang, {$user} dari {$desa}." ;
+        }else{
+            $this->heading = "Selamat Datang, {$user}." ;
+        }
+    }
+
+
 }

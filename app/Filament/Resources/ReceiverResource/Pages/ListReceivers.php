@@ -15,25 +15,30 @@ class ListReceivers extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('Create') // Ubah label
-                // ->icon('heroicon-o-plus') // Tambahkan ikon
-                ->color('primary') // Warna tombol,,
+            ->label('New Data Alternatif'),
         ];
     }
 
     public function getTabs(): array
     {
-        return [
+        $tabs = [
             'all' => Tab::make('All'),
-            
+    
             'approved' => Tab::make('Approved')
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'Approved')),
-            
+    
             'need' => Tab::make('Need Approval')
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'Need Approval')),
-            
+    
             'rejected' => Tab::make('Rejected')
                 ->modifyQueryUsing(fn ($query) => $query->where('status', 'Rejected')),
         ];
+    
+        if (auth()->user()?->hasRole(['Staff Desa'])) {
+            $tabs['draft'] = Tab::make('Draft')
+                ->modifyQueryUsing(fn ($query) => $query->where('status', 'Draft'));
+        }
+    
+        return $tabs;
     }
 }

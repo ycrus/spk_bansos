@@ -57,7 +57,13 @@ class ResultResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('period.name'),
-                TextColumn::make('status'),
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Active' => 'success',
+                        'Review' => 'warning',
+                        'Done' => 'primary',
+                    }),
             ])
             ->filters([
                 //
@@ -95,11 +101,11 @@ class ResultResource extends Resource
     }
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin']);
+        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
     }
 }

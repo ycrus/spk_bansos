@@ -34,9 +34,10 @@ class ReceiverPeriodRelationManager extends RelationManager
                 
                             // Ambil data receiver yang belum dipakai
                             return Receiver::whereNotIn('id', $usedReceiverIds)
+                            ->where('status', 'Approved')
                                 ->get()
                                 ->mapWithKeys(function ($receiver) {
-                                    return [$receiver->id => "{$receiver->nik} - {$receiver->nama}"];
+                                    return [$receiver->id => "{$receiver->nik} - {$receiver->nama} - {$receiver->desa->name}"];
                                 });
                         }
                     )

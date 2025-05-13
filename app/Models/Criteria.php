@@ -15,6 +15,7 @@ class Criteria extends Model
         'title',
         'unit',
         'description',
+        'is_active',
     ];
 
     public function programs(): BelongsToMany
