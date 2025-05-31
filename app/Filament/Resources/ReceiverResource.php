@@ -18,7 +18,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
-
+use Illuminate\Database\Eloquent\Collection;
 
 class ReceiverResource extends Resource
 {
@@ -38,76 +38,81 @@ class ReceiverResource extends Resource
                     ->required()
                     ->numeric(),
                 Select::make('kelurahan')
-                ->options(function () {
-                    $user = auth()->user();
-            
-                    if ($user?->hasRole('Staff Desa')) {
-                        return \App\Models\Kelurahan::where('id', $user->desa)->pluck('name', 'id');
-                    }
-            
-                    return \App\Models\Kelurahan::all()->pluck('name', 'id');
-                })
+                    ->options(function () {
+                        $user = auth()->user();
+
+                        if ($user?->hasRole('Staff Desa')) {
+                            return \App\Models\Kelurahan::where('id', $user->desa)->pluck('name', 'id');
+                        }
+
+                        return \App\Models\Kelurahan::all()->pluck('name', 'id');
+                    })
                     ->searchable()
                     ->required(),
+                TextInput::make('alamat')
+                    ->label('Alamat'),
                 Select::make('pekerjaan')
                     ->options(
                         Parameter::where('criteria_id', '=', 3)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
+                    )->native(false),
                 Select::make('penghasilan')
                     ->options(
                         Parameter::where('criteria_id', '=', 1)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
+                    )->native(false),
                 Select::make('status_tempat_tinggal')
                     ->options(
-                        Parameter::where('criteria_id', '=', 4)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
-                Select::make('status_perkawinan')
-                    ->options(
                         Parameter::where('criteria_id', '=', 5)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
+                    )->native(false),
+                Select::make('status_perkawinan')
+                    ->label('Jumlah Anggota Balita/Anak Sekolah/Lansia')
+                    ->options(
+                        Parameter::where('criteria_id', '=', 4)->pluck('title', 'title')->toArray()
+                    )->native(false),
                 Select::make('jumlah_tanggungan')
+                    ->label('Jumlah Anggota Keluarga')
                     ->options(
                         Parameter::where('criteria_id', '=', 6)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
+                    )->native(false),
                 Select::make('keadaan_rumah')
                     ->options(
                         Parameter::where('criteria_id', '=', 7)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
+                    )->native(false),
                 Select::make('disabilitas')
-                    ->options(
-                        Parameter::where('criteria_id', '=', 8)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
-                Select::make('pendidikan')
+                    ->label('Jumlah Anggota Disabilitas')
                     ->options(
                         Parameter::where('criteria_id', '=', 9)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
-                Select::make('fasilitas_mck')
+                    )->native(false),
+                Select::make('pendidikan')
                     ->options(
                         Parameter::where('criteria_id', '=', 10)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
-                Select::make('bahan_bakar_harian')
+                    )->native(false),
+                Select::make('fasilitas_mck')
                     ->options(
                         Parameter::where('criteria_id', '=', 11)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
+                    )->native(false),
+                Select::make('bahan_bakar_harian')
+                    ->options(
+                        Parameter::where('criteria_id', '=', 8)->pluck('title', 'title')->toArray()
+                    )->native(false),
                 Select::make('kepemilikan_kendaraan')
                     ->options(
                         Parameter::where('criteria_id', '=', 12)->pluck('title', 'title')->toArray()
-                    )->native(false)->required(),
+                    )->native(false),
 
                 Textarea::make('remark')
                     ->label('Remark'),
 
                 Radio::make('status')
                     ->options([
-                                'Need Approval' => 'Yes',
-                                'Rejected' => 'No'
-                                ])
+                        'Need Approval' => 'Yes',
+                        'Rejected' => 'No'
+                    ])
                     ->inline()
                     ->label('Data sudah diperbaiki?')
                     ->required()
-                    ->reactive() 
-                    ->visible(fn ($record) => $record->status === 'Rejected')
-                    ->extraAttributes(fn ($state) => [
+                    ->reactive()
+                    ->visible(fn($record) => $record && $record->status === 'Rejected')
+                    ->extraAttributes(fn($state) => [
                         'class' => match ($state) {
                             'Approved' => 'text-green-600',
                             'Rejected' => 'text-red-600',
@@ -117,9 +122,9 @@ class ReceiverResource extends Resource
 
                 Radio::make('status')
                     ->options([
-                                'Need Approval' => 'Yes',
-                                'Draft' => 'No'
-                                ])
+                        'Need Approval' => 'Yes',
+                        'Draft' => 'No'
+                    ])
                     ->inline()
                     ->label('Ajukan Data Alternatif?')
                     ->required()
@@ -128,6 +133,11 @@ class ReceiverResource extends Resource
                         return $record && $record->status === 'Draft';
                     })
                     ->extraAttributes(fn ($state) => [
+                    ->reactive()
+                    ->visible(function ($record) {
+                        return $record && $record->status === 'Draft';
+                    })
+                    ->extraAttributes(fn($state) => [
                         'class' => match ($state) {
                             'Approved' => 'text-green-600',
                             'Draft' => 'text-red-600',
@@ -135,9 +145,27 @@ class ReceiverResource extends Resource
                         },
                     ]),
 
-                    TextInput::make('status')
+                Radio::make('status')
+                    ->options([
+                        'Need Approval' => 'Yes',
+                        'Need Update' => 'No'
+                    ])
+                    ->inline()
+                    ->label('Data sudah di update?')
+                    ->required()
+                    ->reactive()
+                    ->visible(fn($record) => $record->status === 'Need Update')
+                    ->extraAttributes(fn($state) => [
+                        'class' => match ($state) {
+                            'Approved' => 'text-green-600',
+                            'Need Update' => 'text-red-600',
+                            default => '',
+                        },
+                    ]),
+
+                TextInput::make('status')
                     ->label('Status')
-                    ->default('Draft') 
+                    ->default('Draft')
                     ->disabled()
                     ->dehydrated(),
 
@@ -152,10 +180,10 @@ class ReceiverResource extends Resource
                     $desaId = auth()->user()?->desa;
                     return $query->where('kelurahan', $desaId);
                 }
-            
-                return $query->whereNot('status','Draft');
+
+                return $query->whereNot('status', 'Draft');
             })
-            ->recordUrl(fn ($record) => Pages\ViewReceivers::getUrl(['record' => $record]))
+            ->recordUrl(fn($record) => Pages\ViewReceivers::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('nik')
                     ->searchable()
@@ -188,11 +216,13 @@ class ReceiverResource extends Resource
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('status_perkawinan')
+                    ->label('Jumlah Anggota Balita/Anak Sekolah/Lansia')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('jumlah_tanggungan')
+                    ->label('Jumlah Anggota Keluarga')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
@@ -208,6 +238,7 @@ class ReceiverResource extends Resource
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('disabilitas')
+                    ->label('Jumlah Anggota Disabilitas')
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
@@ -233,48 +264,51 @@ class ReceiverResource extends Resource
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('status')
+                    ->searchable()
+                    ->sortable()
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Approved' => 'success',
                         'Need Approval' => 'warning',
                         'Draft' => 'primary',
                         'Rejected' => 'danger',
+                        'Need Update' => 'gray',
                     })
             ])
-            ->filters([
-            ])
+            ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->visible(fn ($record) => in_array($record->status, ['Rejected', 'Draft']))
+                    ->visible(fn($record) => in_array($record->status, ['Rejected', 'Draft', 'Need Update']))
                     ->color('primary')
-                    ->button() ,
+                    ->button(),
 
                 Action::make('approveReject')
                     ->label('Tinjau')
                     ->icon('heroicon-o-check-circle')
-                    ->color('primary') // 'success', 'danger', 'warning', 'secondary', 'gray', 'info'
-                    ->iconPosition('after') // atau 'after'
-                    ->visible(fn ($record) => $record->status === 'Need Approval' && auth()->user()?->hasRole('Staff Kecamatan'))
-                    ->button() 
-                    ->form([Radio::make('status')
-                                ->options([
-                                            'Approved' => 'Approve',
-                                            'Rejected' => 'Reject'
-                                            ])
-                                ->inline()
-                                ->required()
-                                ->reactive() 
-                                ->afterStateUpdated(fn ($state, callable $set) => $state !== 'Rejected' ? $set('note', null) : null)
-                                ->extraAttributes(fn ($state) => [
-                                    'class' => match ($state) {
-                                        'Approved' => 'text-green-600',
-                                        'Rejected' => 'text-red-600',
-                                        default => '',
-                                    },
-                                ]),
-                            Textarea::make('remark')
-                                ->label('Catatan')
-                                ->visible(fn ($get) => $get('status') === 'Rejected')
+                    ->color('primary')
+                    ->iconPosition('after')
+                    ->visible(fn($record) => $record->status === 'Need Approval' && auth()->user()?->hasRole('Staff Kecamatan'))
+                    ->button()
+                    ->form([
+                        Radio::make('status')
+                            ->options([
+                                'Approved' => 'Approve',
+                                'Rejected' => 'Reject'
+                            ])
+                            ->inline()
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(fn($state, callable $set) => $state !== 'Rejected' ? $set('note', null) : null)
+                            ->extraAttributes(fn($state) => [
+                                'class' => match ($state) {
+                                    'Approved' => 'text-green-600',
+                                    'Rejected' => 'text-red-600',
+                                    default => '',
+                                },
+                            ]),
+                        Textarea::make('remark')
+                            ->label('Catatan')
+                            ->visible(fn($get) => $get('status') === 'Rejected')
                     ])
                     ->action(function (array $data, $record) {
                         if ($data['status'] === 'Approved') {
@@ -291,21 +325,39 @@ class ReceiverResource extends Resource
                         $record->status = $data['status'];
                         $record->remark = $data['remark'] ?? null;
                         $record->save();
+                    }),
+
+                Action::make('needUpdate')
+                    ->label('Need Update')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('primary')
+                    ->iconPosition('after')
+                    ->visible(fn($record) => $record->status === 'Approved' && auth()->user()?->hasRole('Staff Kecamatan'))
+                    ->button()
+                    ->action(function (array $data, $record) {
+                        $record->status = 'Need Update';
+                        $record->save();
 
                         
                     })
-                
-                ])
-                ->bulkActions([
-                    match (request()->query('activeTab')) {
-                        'draft' => Tables\Actions\BulkActionGroup::make([
-                            Tables\Actions\DeleteBulkAction::make(),
-                            // Tambah bulk action lain khusus tab "draft" di sini
-                        ]),
-                        default => Tables\Actions\BulkActionGroup::make([]), 
-                        // atau bisa juga tidak ditampilkan sama sekali
-                    }
-                ]); 
+
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('bulkApprove')
+                        ->label('Approve All')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('primary')
+                        ->requiresConfirmation()
+                        ->visible(fn($livewire) => $livewire->activeTab === 'need'
+                            && auth()->user()?->hasRole('Staff Kecamatan'))
+                        ->action(function (Collection $records) {
+                            foreach ($records as $record) {
+                                $record->update(['status' => 'Approved']);
+                            }
+                        }),
+                ]),
+            ]);
     }
 
     public static function getRelations(): array
@@ -327,11 +379,11 @@ class ReceiverResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan', 'Staff Desa','Staff Kecamatan']);
+        return auth()->user()?->hasRole(['Super Admin', 'Admin Kecamatan', 'Staff Desa', 'Staff Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan', 'Staff Desa','Staff Kecamatan']);
+        return auth()->user()?->hasRole(['Super Admin', 'Admin Kecamatan', 'Staff Desa', 'Staff Kecamatan']);
     }
 }

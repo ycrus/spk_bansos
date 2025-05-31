@@ -16,6 +16,8 @@ class ResultExporter extends Exporter
     {
         return [
             ExportColumn::make('penerima.nik'),
+            ExportColumn::make('penerima.nama')->label('Nama'),
+            ExportColumn::make('penerima.desa.name')->label('Kelurahan'),
             ExportColumn::make('status'),
         ];
     }
