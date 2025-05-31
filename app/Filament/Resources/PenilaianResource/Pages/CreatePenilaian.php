@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\PenilaianResource\Pages;
 
 use App\Filament\Resources\PenilaianResource;
+use App\Models\CalonPenerima;
+use App\Models\Receiver;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Pages\Actions\CreateAction;
@@ -32,5 +34,19 @@ class CreatePenilaian extends CreateRecord
     protected function getRedirectUrl():string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    protected function afterCreate(): void
+    {
+        $record = $this->record;
+
+        $approvedReceivers = Receiver::where('status', 'Approved')->get();
+
+        foreach ($approvedReceivers as $receiver) {
+            CalonPenerima::create([
+                'penilaian_id' => $record->id,
+                'receiver_id' => $receiver->id,
+            ]);
+        }
     }
 }

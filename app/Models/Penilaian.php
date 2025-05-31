@@ -52,4 +52,9 @@ class Penilaian extends Model
     {
         return $this->hasMany(Rangking::class);
     }
+
+    public function dataCalonPenerima(): HasMany
+    {
+        return $this->hasMany(CalonPenerima::class);
+    }
 }

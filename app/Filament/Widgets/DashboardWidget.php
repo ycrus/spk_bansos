@@ -36,7 +36,7 @@ class DashboardWidget extends StatsOverviewWidget
                         ->chart([2, 4, 3, 5, 6, 7])
                         ->color('danger');
         }else{
-            $stats[] = Stat::make('Total Data Alternatif', Receiver::count())
+            $stats[] = Stat::make('Total Data Alternatif', Receiver::where('status', '!=', 'Draft')->count())
                         ->description('Total penerima yang terdaftar')
                         ->descriptionIcon('heroicon-m-user-group', IconPosition::Before)
                         ->chart([1, 5, 3, 4, 8, 10])

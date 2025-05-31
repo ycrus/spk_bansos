@@ -3,9 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PenilaianResource\Pages;
+use App\Filament\Resources\PenilaianResource\RelationManagers\CalonPenerimaRelationManager;
 use App\Filament\Resources\PenilaianResource\RelationManagers\ReceiverPeriodRelationManager;
+use App\Models\CalonPenerima;
 use App\Models\Penilaian;
 use App\Models\Period;
+use App\Models\Receiver;
 use App\Services\PenilaianService;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -15,6 +18,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class PenilaianResource extends Resource
 {
@@ -101,7 +105,8 @@ class PenilaianResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ReceiverPeriodRelationManager::class
+            ReceiverPeriodRelationManager::class,
+            CalonPenerimaRelationManager::class
         ];
     }
 
@@ -122,5 +127,17 @@ class PenilaianResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
+    }
+
+    public static function afterCreate(Model $record): void
+    {
+        $approvedAlternatives = Receiver::where('status', 'Approved')->get();
+
+        foreach ($approvedAlternatives as $alternative) {
+            CalonPenerima::create([
+                'penilaian_id' => $record->id,
+                'receiver_id' => $alternative->id,
+            ]);
+        }
     }
 }

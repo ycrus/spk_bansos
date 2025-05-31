@@ -3,9 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReceiverResource\Pages;
+use App\Models\CalonPenerima;
 use App\Models\Parameter;
+use App\Models\Penilaian;
 use App\Models\Receiver;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -47,9 +48,6 @@ class ReceiverResource extends Resource
                     return \App\Models\Kelurahan::all()->pluck('name', 'id');
                 })
                     ->searchable()
-                    ->required(),
-                DatePicker::make('tanggal_lahir')
-                    ->native(false)
                     ->required(),
                 Select::make('pekerjaan')
                     ->options(
@@ -126,7 +124,9 @@ class ReceiverResource extends Resource
                     ->label('Ajukan Data Alternatif?')
                     ->required()
                     ->reactive() 
-                    ->visible(fn ($record) => $record->status === 'Draft')
+                    ->visible(function ($record) {
+                        return $record && $record->status === 'Draft';
+                    })
                     ->extraAttributes(fn ($state) => [
                         'class' => match ($state) {
                             'Approved' => 'text-green-600',
@@ -248,6 +248,7 @@ class ReceiverResource extends Resource
                     ->visible(fn ($record) => in_array($record->status, ['Rejected', 'Draft']))
                     ->color('primary')
                     ->button() ,
+
                 Action::make('approveReject')
                     ->label('Tinjau')
                     ->icon('heroicon-o-check-circle')
@@ -276,9 +277,22 @@ class ReceiverResource extends Resource
                                 ->visible(fn ($get) => $get('status') === 'Rejected')
                     ])
                     ->action(function (array $data, $record) {
+                        if ($data['status'] === 'Approved') {
+                            $penilaians = Penilaian::where('status', 'Active')->get();
+        
+                            foreach ($penilaians as $penilaian) {
+                                CalonPenerima::firstOrCreate([
+                                    'receiver_id' => $record->id,
+                                    'penilaian_id' => $penilaian->id,
+                                ]);
+                            }
+                        }
+                        
                         $record->status = $data['status'];
                         $record->remark = $data['remark'] ?? null;
                         $record->save();
+
+                        
                     })
                 
                 ])
