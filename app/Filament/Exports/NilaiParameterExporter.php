@@ -16,17 +16,19 @@ class NilaiParameterExporter extends Exporter
     {
         return [
             ExportColumn::make('penerima.nik')->label('NIK'),
-            ExportColumn::make('pekerjaan'),
-            ExportColumn::make('penghasilan'),
-            ExportColumn::make('status_tempat_tinggal'),
-            ExportColumn::make('status_perkawinan'),
-            ExportColumn::make('jumlah_tanggungan'),
-            ExportColumn::make('keadaan_rumah'),
-            ExportColumn::make('disabilitas'),
-            ExportColumn::make('pendidikan'),
-            ExportColumn::make('fasilitas_mck'),
-            ExportColumn::make('bahan_bakar_harian'),
-            ExportColumn::make('kepemilikan_kendaraan'),
+            ExportColumn::make('penerima.nama')->label('Nama'),
+            ExportColumn::make('penerima.desa.name')->label('Kelurahan'),
+            ExportColumn::make('pekerjaan')->label('Pekerjaan'),
+            ExportColumn::make('penghasilan')->label('Penghasilan'),
+            ExportColumn::make('status_tempat_tinggal')->label('Status Tempat Tinggal'),
+            ExportColumn::make('status_perkawinan')->label('Jumlah Anggota Balita/Anak Sekolah/Lansia'),
+            ExportColumn::make('jumlah_tanggungan')->label('Jumlah Anggota Keluarga'),
+            ExportColumn::make('keadaan_rumah')->label('Keadaan Rumah'),
+            ExportColumn::make('disabilitas')->label('Jumlah Anggota Disabilitas'),
+            ExportColumn::make('pendidikan')->label('Pendidikan'),
+            ExportColumn::make('fasilitas_mck')->label('Fasilitas MCK'),
+            ExportColumn::make('bahan_bakar_harian')->label('Bahan Bakar Masak'),
+            ExportColumn::make('kepemilikan_kendaraan')->label('Kepemilikan Kendaraan'),
         ];
     }
 

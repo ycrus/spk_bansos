@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ResultResource\Pages;
-use App\Filament\Resources\ResultResource\RelationManagers;
 use App\Filament\Resources\ResultResource\RelationManagers\NilaiAkhirRelationManager;
 use App\Filament\Resources\ResultResource\RelationManagers\NilaiParameterRelationManager;
 use App\Filament\Resources\ResultResource\RelationManagers\NilaiUtilityRelationManager;
@@ -11,8 +10,6 @@ use App\Filament\Resources\ResultResource\RelationManagers\RankingRelationManage
 use App\Filament\Resources\ResultResource\RelationManagers\ResultRelationManager;
 use App\Models\Penilaian;
 use App\Models\Period;
-use Filament\Forms;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -20,8 +17,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ResultResource extends Resource
 {
@@ -59,7 +54,7 @@ class ResultResource extends Resource
                 TextColumn::make('period.name'),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Active' => 'success',
                         'Review' => 'warning',
                         'Done' => 'primary',
@@ -101,11 +96,11 @@ class ResultResource extends Resource
     }
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
+        return auth()->user()?->hasRole(['Super Admin', 'Admin Kecamatan', 'Staff Kecamatan']);
     }
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan','Staff Kecamatan']);
+        return auth()->user()?->hasRole(['Super Admin', 'Admin Kecamatan', 'Staff Kecamatan']);
     }
 }
