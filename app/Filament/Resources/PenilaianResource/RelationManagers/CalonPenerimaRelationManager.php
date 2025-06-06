@@ -8,8 +8,11 @@ use App\Models\Receiver;
 use Filament\Tables\Actions\Action;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 class CalonPenerimaRelationManager extends RelationManager
@@ -43,12 +46,17 @@ class CalonPenerimaRelationManager extends RelationManager
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
-                TextColumn::make('penerima.tanggal_lahir')
-                    ->label("Tanggal Lahir")
+                TextColumn::make('penerima.desa.name')
+                    ->label("Desa")
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
+                TextColumn::make('penerima.alamat')
+                    ->label("Alamat")
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
             ])
             ->filters([
                 //
@@ -63,7 +71,7 @@ class CalonPenerimaRelationManager extends RelationManager
                 ->color('primary') // 'success', 'danger', 'warning', 'secondary', 'gray', 'info'
                 ->iconPosition('before') 
                 ->button() 
-                ->action(function (array $data, $record) {
+                ->action(function ($record) {
                     $exists = Calculate_Receiver::where('penilaian_id', $record->penilaian_id)
                     ->where('receiver_id', $record->receiver_id)
                     ->exists();
@@ -81,7 +89,31 @@ class CalonPenerimaRelationManager extends RelationManager
                 })
             ])
             ->bulkActions([
+                BulkActionGroup::make([
+                    BulkAction::make('add')
+                        ->label('Add All')
+                        ->icon('heroicon-o-plus-circle')
+                        ->color('primary')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            foreach ($records as $record) {
+                                $exists = Calculate_Receiver::where('penilaian_id', $record->penilaian_id)
+                                ->where('receiver_id', $record->receiver_id)
+                                ->exists();
 
+                                if (! $exists) {
+                                    Calculate_Receiver::create([
+                                        'penilaian_id' => $record->penilaian_id,
+                                        'receiver_id' => $record->receiver_id,
+                                    ]);
+
+                                    CalonPenerima::where('penilaian_id', $record->penilaian_id)
+                                        ->where('receiver_id', $record->receiver_id)
+                                        ->delete();
+                                }
+                            }
+                        }),
+                ]),
             ]);
     }
 }

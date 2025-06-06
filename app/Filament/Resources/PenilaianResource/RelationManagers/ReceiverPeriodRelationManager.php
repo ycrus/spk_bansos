@@ -5,18 +5,15 @@ namespace App\Filament\Resources\PenilaianResource\RelationManagers;
 use App\Models\Calculate_Receiver;
 use App\Models\CalonPenerima;
 use App\Models\Receiver;
-use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\Collection;
 
 class ReceiverPeriodRelationManager extends RelationManager
 {
@@ -66,8 +63,14 @@ class ReceiverPeriodRelationManager extends RelationManager
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
-                TextColumn::make('penerima.tanggal_lahir')
-                    ->label("Tanggal Lahir")
+                TextColumn::make('penerima.desa.name')
+                    ->label("Desa")
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft(),
+                TextColumn::make('penerima.alamat')
+                    ->label("Alamat")
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
@@ -142,7 +145,7 @@ class ReceiverPeriodRelationManager extends RelationManager
                 ->color('danger') // 'success', 'danger', 'warning', 'secondary', 'gray', 'info'
                 ->iconPosition('before') 
                 ->button() 
-                ->action(function (array $data, $record) {
+                ->action(function ( $record) {
                     $exists = CalonPenerima::where('penilaian_id', $record->penilaian_id)
                     ->where('receiver_id', $record->receiver_id)
                     ->exists();
@@ -160,8 +163,30 @@ class ReceiverPeriodRelationManager extends RelationManager
                 })
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    BulkAction::make('delete')
+                        ->label('Delete All')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            foreach ($records as $record) {
+                                $exists = CalonPenerima::where('penilaian_id', $record->penilaian_id)
+                                ->where('receiver_id', $record->receiver_id)
+                                ->exists();
+
+                                if (! $exists) {
+                                    CalonPenerima::create([
+                                        'penilaian_id' => $record->penilaian_id,
+                                        'receiver_id' => $record->receiver_id,
+                                    ]);
+
+                                    Calculate_Receiver::where('penilaian_id', $record->penilaian_id)
+                                        ->where('receiver_id', $record->receiver_id)
+                                        ->delete();
+                                }
+                            }
+                        }),
                 ]),
             ]);
     }

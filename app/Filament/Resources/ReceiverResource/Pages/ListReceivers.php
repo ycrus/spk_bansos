@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\ReceiverResource\Pages;
 
+use App\Filament\Exports\ReceiverExporter;
 use App\Filament\Resources\ReceiverResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Resources\Components\Tab;
+use Filament\Actions\ExportAction;
 
 class ListReceivers extends ListRecords
 {
@@ -16,6 +18,10 @@ class ListReceivers extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->label('New Data Alternatif'),
+                            
+            ExportAction::make('export')
+                    ->label('Download Data Alternatif')
+                    ->exporter(ReceiverExporter::class),
         ];
     }
 

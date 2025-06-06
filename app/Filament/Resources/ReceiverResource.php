@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\ReceiverExporter;
 use App\Filament\Resources\ReceiverResource\Pages;
 use App\Models\CalonPenerima;
 use App\Models\Parameter;
@@ -129,11 +130,6 @@ class ReceiverResource extends Resource
                     ->label('Ajukan Data Alternatif?')
                     ->required()
                     ->reactive() 
-                    ->visible(function ($record) {
-                        return $record && $record->status === 'Draft';
-                    })
-                    ->extraAttributes(fn ($state) => [
-                    ->reactive()
                     ->visible(function ($record) {
                         return $record && $record->status === 'Draft';
                     })
