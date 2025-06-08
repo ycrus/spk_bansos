@@ -13,12 +13,25 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Builder;
 
 class PeriodResource extends Resource
 {
     protected static ?string $model = Period::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static ?string $navigationLabel = 'Period';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Assessment';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 1;
+    }
 
     public static function form(Form $form): Form
     {
@@ -44,14 +57,16 @@ class PeriodResource extends Resource
                     ->default('Active') 
                     ->disabled()
                     ->dehydrated(),
-                TextInput::make('description')
-                    ->required(),
+                TextInput::make('description'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+        ->query(
+            Period::query()
+                    ->orderByRaw('COALESCE(updated_at, created_at) DESC'))
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
@@ -61,10 +76,24 @@ class PeriodResource extends Resource
                 TextColumn::make('program.name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
+                TextColumn::make('updated_at')
+                    ->label('Modified Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'Active' => 'success',
+                        'Active' => 'info',
                         'Review' => 'warning',
                         'Done' => 'success',
                     }),
@@ -72,11 +101,28 @@ class PeriodResource extends Resource
             ])
             ->filters([
                 SelectFilter::make('status')
-                ->options(fn () => Period::query()->distinct()->pluck('status', 'status'))
+                    ->options(fn () => Period::query()->distinct()->pluck('status', 'status')),
+                Filter::make('date_filter')
+                    ->label('Filter by Date')
+                    ->form([
+                        Select::make('field')->options([
+                            'created_at' => 'Created Date',
+                            'updated_at' => 'Modified Date',
+                        ])->default('created_at'),
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('to')->label('To'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        $field = $data['field'] ?? 'created_at';
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->whereDate($field, '>=', $data['from']))
+                            ->when($data['to'], fn ($q) => $q->whereDate($field, '<=', $data['to']));
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
-                ->visible(fn($record) => $record->status === 'Active'),
+                ->visible(fn($record) => $record->status === 'Active')
+                ->button(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

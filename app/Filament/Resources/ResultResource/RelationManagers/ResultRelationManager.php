@@ -32,7 +32,6 @@ class ResultRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('result')
-            // ->query(fn(Builder $query) => $query->where('is_ranked', true))
             ->columns([
                 Tables\Columns\TextColumn::make('penerima.nik')
                     ->searchable()
@@ -46,12 +45,14 @@ class ResultRelationManager extends RelationManager
                     ->searchable()
                     ->sortable()
                     ->label('Kelurahan'),
-                BooleanColumn::make('is_ranked')->label('Status')
+                BooleanColumn::make('is_ranked')
+                    ->label('Status')
                     ->sortable(),
             ])
             ->filters([])
             ->headerActions([
                 ExportAction::make()
+                    ->label('Download Result Data')
                     ->exporter(ResultExporter::class),
                 
             ])

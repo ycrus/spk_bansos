@@ -6,12 +6,9 @@ use App\Filament\Exports\NilaiParameterExporter;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class NilaiParameterRelationManager extends RelationManager
 {
@@ -39,67 +36,56 @@ class NilaiParameterRelationManager extends RelationManager
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('pekerjaan')
-                ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignCenter(),
                 TextColumn::make('penghasilan')
-                    // ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('status_perkawinan')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('jumlah_tanggungan')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('status_tempat_tinggal')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('keadaan_rumah')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('disabilitas')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('pendidikan')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('fasilitas_mck')
-                ->toggleable()
-                    ->searchable()
+                   ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('bahan_bakar_harian')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
                 TextColumn::make('kepemilikan_kendaraan')
-                // ->toggleable()
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
@@ -110,6 +96,7 @@ class NilaiParameterRelationManager extends RelationManager
             ])
             ->headerActions([
                 ExportAction::make()
+                    ->label('Download Nilai Parameter Data')
                     ->exporter(NilaiParameterExporter::class)
             ])
             ->actions([])

@@ -10,8 +10,6 @@ use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class NilaiAkhirRelationManager extends RelationManager
 {
@@ -116,6 +114,7 @@ class NilaiAkhirRelationManager extends RelationManager
             ])
             ->headerActions([
                 ExportAction::make()
+                    ->label('Download Nilai Akhir Data')
                     ->exporter(NilaiAkhirExporter::class)
             ])
             ->actions([

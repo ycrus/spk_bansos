@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Exports\ReceiverExporter;
 use App\Filament\Resources\ReceiverResource\Pages;
 use App\Models\CalonPenerima;
 use App\Models\Parameter;
@@ -18,16 +17,20 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReceiverResource extends Resource
 {
     protected static ?string $model = Receiver::class;
-
     public static ?string $pluralModelLabel = 'Data Alternatif';
-
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Master Data';
+    }
 
     public static function form(Form $form): Form
     {
@@ -45,7 +48,6 @@ class ReceiverResource extends Resource
                         if ($user?->hasRole('Staff Desa')) {
                             return \App\Models\Kelurahan::where('id', $user->desa)->pluck('name', 'id');
                         }
-
                         return \App\Models\Kelurahan::all()->pluck('name', 'id');
                     })
                     ->searchable()
@@ -99,10 +101,8 @@ class ReceiverResource extends Resource
                     ->options(
                         Parameter::where('criteria_id', '=', 12)->pluck('title', 'title')->toArray()
                     )->native(false),
-
                 Textarea::make('remark')
                     ->label('Remark'),
-
                 Radio::make('status')
                     ->options([
                         'Need Approval' => 'Yes',
@@ -176,9 +176,11 @@ class ReceiverResource extends Resource
                     $desaId = auth()->user()?->desa;
                     return $query->where('kelurahan', $desaId);
                 }
-
                 return $query->whereNot('status', 'Draft');
             })
+            ->query(
+                Receiver::query()
+                        ->orderByRaw('COALESCE(updated_at, created_at) DESC'))
             ->recordUrl(fn($record) => Pages\ViewReceivers::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('nik')
@@ -259,6 +261,20 @@ class ReceiverResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
+                TextColumn::make('updated_at')
+                    ->label('Modified Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
                 TextColumn::make('status')
                     ->searchable()
                     ->sortable()
@@ -271,7 +287,24 @@ class ReceiverResource extends Resource
                         'Need Update' => 'gray',
                     })
             ])
-            ->filters([])
+            ->filters([
+                Filter::make('date_filter')
+                    ->label('Filter by Date')
+                    ->form([
+                        Select::make('field')->options([
+                            'created_at' => 'Created Date',
+                            'updated_at' => 'Modified Date',
+                        ])->default('created_at'),
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('to')->label('To'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        $field = $data['field'] ?? 'created_at';
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->whereDate($field, '>=', $data['from']))
+                            ->when($data['to'], fn ($q) => $q->whereDate($field, '<=', $data['to']));
+                    }),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->visible(fn($record) => in_array($record->status, ['Rejected', 'Draft', 'Need Update']))
@@ -324,7 +357,7 @@ class ReceiverResource extends Resource
                     }),
 
                 Action::make('needUpdate')
-                    ->label('Need Update')
+                    ->label('Request Update')
                     ->icon('heroicon-o-arrow-path')
                     ->color('primary')
                     ->iconPosition('after')
@@ -332,11 +365,8 @@ class ReceiverResource extends Resource
                     ->button()
                     ->action(function (array $data, $record) {
                         $record->status = 'Need Update';
-                        $record->save();
-
-                        
+                        $record->save();                                             
                     })
-
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

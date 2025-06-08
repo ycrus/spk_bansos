@@ -12,6 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\SelectFilter;
 
 class CriteriaResource extends Resource
 {
@@ -21,21 +22,28 @@ class CriteriaResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-pie';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Master Data';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('title')
                 ->disabled(),
-                TextInput::make('description')
-                ,
+                TextInput::make('description'),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-        ->recordUrl(fn ($record) => ViewCriterias::getUrl(['record' => $record]))
+            ->query(
+                Criteria::query()
+                        ->orderByRaw('COALESCE(updated_at, created_at) DESC'))
+            ->recordUrl(fn ($record) => ViewCriterias::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('title')
                     ->searchable()
@@ -48,31 +56,43 @@ class CriteriaResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
+                TextColumn::make('updated_at')
+                    ->label('Modified Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
 
                 ToggleColumn::make('is_active')
                     ->label('Status'),
-
-
             ])
             ->filters([
-                //
+                SelectFilter::make('is_active')
+                ->label('Status')
+                ->options([
+                    '1' => 'Aktif',
+                    '0' => 'Tidak Aktif',
+                ]),
             ])
             ->actions([
-                // Tables\Actions\ViewAction::make(),
-                EditAction::make(),
-                // Tables\Actions\DeleteAction::make(),
+                EditAction::make()
+                ->button(),
             ])
             ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
             ]);
     }
 
     public static function getRelations(): array
     {
         return [
-            //
         ];
     }
 

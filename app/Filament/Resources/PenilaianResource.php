@@ -19,12 +19,26 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
 
 class PenilaianResource extends Resource
 {
     protected static ?string $model = Penilaian::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-plus';
+    protected static ?string $navigationLabel = 'Penilaian';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Assessment';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 2;
+    }
 
     public static function form(Form $form): Form
     {
@@ -41,24 +55,45 @@ class PenilaianResource extends Resource
                             Period::where('id', $state)->update(['status' => 'Review']);
                         }
                     }),
-                TextInput::make('jumlah_penerima')
-                ->required(),
                 TextInput::make('status')
                     ->default("Active")
                     ->disabled()
                     ->dehydrated(),
-
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                Penilaian::query()
+                        ->with('period')
+                        ->withCount('dataPenerima')
+                        ->orderByRaw('COALESCE(updated_at, created_at) DESC'))
             ->columns([
                 TextColumn::make('period.name')
                     ->sortable(),
                 TextColumn::make('jumlah_penerima')
-                    ->sortable(),
+                    ->sortable()
+                    ->alignment('center'),
+                TextColumn::make('data_penerima_count')
+                    ->label('Jumlah Data Alternatif')
+                    ->sortable()
+                    ->alignment('center'),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
+                TextColumn::make('updated_at')
+                    ->label('Modified Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -73,13 +108,31 @@ class PenilaianResource extends Resource
                     : null;
             })
             ->filters([
-                //
+                SelectFilter::make('status')
+                ->options(fn () => Period::query()->distinct()->pluck('status', 'status')),
+                Filter::make('date_filter')
+                    ->label('Filter by Date')
+                    ->form([
+                        Select::make('field')->options([
+                            'created_at' => 'Created Date',
+                            'updated_at' => 'Modified Date',
+                        ])->default('created_at'),
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('to')->label('To'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        $field = $data['field'] ?? 'created_at';
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->whereDate($field, '>=', $data['from']))
+                            ->when($data['to'], fn ($q) => $q->whereDate($field, '<=', $data['to']));
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
+                    ->button()
                     ->visible(fn($record) => $record->status === 'Active'),
                 Action::make('startButton')
-                    ->label('START')
+                    ->label('Start')
                     ->action(function ($record) {
                         $service = app(PenilaianService::class);
                         $service->startCalculate($record->id);
@@ -91,14 +144,13 @@ class PenilaianResource extends Resource
 
                         session()->flash('success', 'Calculation started');
                     })                    
-                    ->color('red')
+                    ->color('danger')
                     ->icon('heroicon-o-link')
+                    ->button()
                     ->visible(fn($record) => $record->status === 'Active' && $record->dataPenerima()->count() > 0),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+               
             ]);
     }
 

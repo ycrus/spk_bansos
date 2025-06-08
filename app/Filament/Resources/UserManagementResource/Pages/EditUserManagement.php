@@ -6,7 +6,6 @@ use App\Filament\Resources\UserManagementResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Pages\Actions\Action;
-use Illuminate\Support\Str;
 use Filament\Notifications\Notification;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +17,8 @@ class EditUserManagement extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+            ->visible(fn ($record) => $record->id !== auth()->id()),
             Action::make('resetPassword')
                 ->label('Reset Password')
                 ->color('danger')

@@ -9,8 +9,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RankingRelationManager extends RelationManager
 {
@@ -46,7 +44,8 @@ class RankingRelationManager extends RelationManager
             ])
             ->headerActions([
                 ExportAction::make()
-                    ->exporter(RangkingExporter::class)
+                ->label('Download Ranking Data')
+                ->exporter(RangkingExporter::class)
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -56,7 +55,6 @@ class RankingRelationManager extends RelationManager
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])
-            ->exportable();
+            ]);
     }
 }

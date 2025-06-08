@@ -23,14 +23,22 @@ class ResultResource extends Resource
     protected static ?string $model = Penilaian::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
-    protected static ?string $navigationLabel = 'Result';
+    protected static ?string $navigationLabel = 'Hasil Penilaian';
+    public static ?string $pluralModelLabel = 'Hasil Penilaian';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Result';
+    }
+    public static function getNavigationSort(): int
+    {
+        return 3;
+    }
 
     public static function getBreadcrumb(): string
     {
         return 'Result';
     }
 
-    public static ?string $pluralModelLabel = 'Result';
 
     public static function form(Form $form): Form
     {
@@ -50,8 +58,19 @@ class ResultResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                Penilaian::query()
+                ->where('status', 'Done')
+                        ->orderByRaw('created_at DESC'))
             ->columns([
                 TextColumn::make('period.name'),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
                 TextColumn::make('status')
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
@@ -64,13 +83,10 @@ class ResultResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                // Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                ->button(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -89,7 +105,6 @@ class ResultResource extends Resource
     {
         return [
             'index' => Pages\ListResults::route('/'),
-            // 'create' => Pages\CreateResult::route('/create'),
             'view' => Pages\ViewResult::route('/{record}'),
             'edit' => Pages\EditResult::route('/{record}/edit'),
         ];

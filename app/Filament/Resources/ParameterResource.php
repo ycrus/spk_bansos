@@ -19,10 +19,12 @@ use Filament\Tables\Filters\SelectFilter;
 class ParameterResource extends Resource
 {
     protected static ?string $model = Parameter::class;
-
-
     protected static ?string $navigationIcon = 'heroicon-c-adjustments-vertical';
     protected static ?string $navigationLabel = 'Parameter';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Master Data';
+    }
 
     public static function form(Form $form): Form
     {
@@ -42,7 +44,10 @@ class ParameterResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->recordUrl(fn ($record) => ViewParameters::getUrl(['record' => $record]))
+            ->query(
+                Parameter::query()
+                        ->orderByRaw('COALESCE(updated_at, created_at) DESC'))
+            ->recordUrl(fn ($record) => ViewParameters::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('title')
                     ->label('Nama')
@@ -57,9 +62,22 @@ class ParameterResource extends Resource
                     ->sortable()
                     ->weight('medium')
                     ->alignLeft(),
-
                 TextColumn::make('criteria.title')
                     ->searchable(),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
+                TextColumn::make('updated_at')
+                    ->label('Modified Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
             ])
             ->filters([
                 SelectFilter::make('criteria')->relationship('criteria', 'title')

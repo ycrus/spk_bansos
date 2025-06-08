@@ -22,12 +22,19 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProgramResource extends Resource
 {
     protected static ?string $model = Program::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-cube';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Master Data';
+    }
 
     public static function form(Form $form): Form
     {
@@ -100,6 +107,9 @@ class ProgramResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(
+                Program::query()
+                        ->orderByRaw('COALESCE(updated_at, created_at) DESC'))
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
@@ -108,17 +118,44 @@ class ProgramResource extends Resource
                     ->alignLeft(),
                 ToggleColumn::make('is_active')
                     ->label('Status'),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
+                TextColumn::make('updated_at')
+                    ->label('Modified Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
             ])
             ->filters([
                 SelectFilter::make('is_active')
-                    ->options(fn () => Program::query()
-                        ->select('is_active')
-                        ->distinct()
-                        ->get()
-                        ->mapWithKeys(fn ($item) => [
-                        $item->is_active => $item->is_active ? 'Active' : 'Non Active',
-                        ])
-                        )           
+                    ->label('Status')
+                    ->options([
+                        '1' => 'Aktif',
+                        '0' => 'Tidak Aktif',
+                    ]),
+                Filter::make('date_filter')
+                    ->label('Filter by Date')
+                    ->form([
+                        Select::make('field')->options([
+                            'created_at' => 'Created Date',
+                            'updated_at' => 'Modified Date',
+                        ])->default('created_at'),
+                        DatePicker::make('from')->label('From'),
+                        DatePicker::make('to')->label('To'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        $field = $data['field'] ?? 'created_at';
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->whereDate($field, '>=', $data['from']))
+                            ->when($data['to'], fn ($q) => $q->whereDate($field, '<=', $data['to']));
+                    }),           
             ])
             ->actions([
                 ActionGroup::make([
@@ -137,7 +174,6 @@ class ProgramResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // CriteriaRelationManager::class
         ];
     }
 

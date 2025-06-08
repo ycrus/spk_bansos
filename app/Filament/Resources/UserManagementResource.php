@@ -24,6 +24,14 @@ class UserManagementResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-plus';
     protected static ?string $navigationLabel = 'User Management';
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Management';
+    }
+    public static function getNavigationSort(): int
+    {
+        return 4;
+    }
 
     public static function form(Form $form): Form
     {
@@ -78,6 +86,7 @@ class UserManagementResource extends Resource
                         return Roles::all()->pluck('name', 'id');
                     })
                     ->searchable()
+                    ->visible(fn ($record) => $record->id !== auth()->id())
                     ->required()
                     ->reactive(),
 
@@ -108,9 +117,9 @@ class UserManagementResource extends Resource
                         true => 'Active',
                         false => 'Not Active',
                     ])
-                    ->default(true) // Set default value to Active (true)
+                    ->default(true)
+                    ->visible(fn ($record) => $record->id !== auth()->id())
                     ->required(),
-                //
             ])
             ;
     }
@@ -127,28 +136,42 @@ class UserManagementResource extends Resource
             
                 return $query;
             })
+            ->query(
+                User::query()
+                        ->orderByRaw('COALESCE(updated_at, created_at) DESC'))
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('email'),
                 TextColumn::make('userRole.name')
                     ->label('Role'),
                 TextColumn::make('desaStaf.name')
-                    ->label('Desa'), 
+                    ->label('Desa'),
+                TextColumn::make('created_at')
+                    ->label('Created Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
+                TextColumn::make('updated_at')
+                    ->label('Modified Date')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->alignLeft()
+                    ->dateTime('d/m/Y'),
                 ToggleColumn::make('status')
                     ->label('Status')
                     ->disabled(fn ($record) => $record->id === auth()->id()),
-            
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->button(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
@@ -165,7 +188,6 @@ class UserManagementResource extends Resource
             'index' => Pages\ListUserManagement::route('/'),
             'create' => Pages\CreateUserManagement::route('/create'),
             'edit' => Pages\EditUserManagement::route('/{record}/edit'),
-            
         ];
     }
 
@@ -178,5 +200,4 @@ class UserManagementResource extends Resource
     {
         return auth()->user()?->hasRole(['Super Admin','Admin Kecamatan']);
     }
-
 }
