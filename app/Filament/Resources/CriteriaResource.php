@@ -3,12 +3,14 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CriteriaResource\Pages;
+use App\Filament\Resources\CriteriaResource\Pages\ViewCriterias;
 use App\Models\Criteria;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\ToggleColumn;
 
 class CriteriaResource extends Resource
@@ -23,15 +25,17 @@ class CriteriaResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('title'),
-                TextInput::make('description'),
-                // TextInput::make('unit'),
+                TextInput::make('title')
+                ->disabled(),
+                TextInput::make('description')
+                ,
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+        ->recordUrl(fn ($record) => ViewCriterias::getUrl(['record' => $record]))
             ->columns([
                 TextColumn::make('title')
                     ->searchable()
@@ -55,7 +59,7 @@ class CriteriaResource extends Resource
             ])
             ->actions([
                 // Tables\Actions\ViewAction::make(),
-                // Tables\Actions\EditAction::make(),
+                EditAction::make(),
                 // Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -78,6 +82,7 @@ class CriteriaResource extends Resource
             'index' => Pages\ListCriterias::route('/'),
             'create' => Pages\CreateCriteria::route('/create'),
             'edit' => Pages\EditCriteria::route('/{record}/edit'),
+            'view' => Pages\ViewCriterias::route('/{record}'),
         ];
     }
 

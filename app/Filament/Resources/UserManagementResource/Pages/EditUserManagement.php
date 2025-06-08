@@ -25,7 +25,7 @@ class EditUserManagement extends EditRecord
                 ->requiresConfirmation()
                 ->form([
                     TextInput::make('new_password')
-                        ->label('Password Baru')
+                        ->label('New Password')
                         ->password()
                         ->required()
                         ->minLength(6),

@@ -279,7 +279,7 @@ class ReceiverResource extends Resource
                     ->button(),
 
                 Action::make('approveReject')
-                    ->label('Tinjau')
+                    ->label('Review')
                     ->icon('heroicon-o-check-circle')
                     ->color('primary')
                     ->iconPosition('after')

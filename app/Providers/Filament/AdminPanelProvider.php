@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\UpdatePassword;
 use App\Http\Middleware\CheckUserIsActive;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -18,6 +19,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Navigation\UserMenuItem;
+use Filament\Facades\Filament;
 
 
 class AdminPanelProvider extends PanelProvider
@@ -27,13 +30,14 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('dashboard')
+            ->path('admin')
             ->login()
             ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Dashboard::class,
+                // UpdatePassword::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             // ->widgets()
@@ -64,4 +68,16 @@ class AdminPanelProvider extends PanelProvider
             ])
         ;
     }
+
+    public function boot(): void
+{
+    Filament::serving(function () {
+        Filament::registerUserMenuItems([
+            'update-password' => UserMenuItem::make()
+                ->label('Update Password')
+                ->url(UpdatePassword::getUrl())
+                ->icon('heroicon-o-key'),
+        ]);
+    });
+}
 }

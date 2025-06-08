@@ -23,6 +23,7 @@ class UserManagementResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-plus';
+    protected static ?string $navigationLabel = 'User Management';
 
     public static function form(Form $form): Form
     {
@@ -55,6 +56,7 @@ class UserManagementResource extends Resource
                     ->required(fn (string $context) => $context === 'create')
                     ->visible(fn (string $context) => $context === 'create')
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->minLength(8)
                     ->confirmed(),
 
                 TextInput::make('password_confirmation')
@@ -133,7 +135,8 @@ class UserManagementResource extends Resource
                 TextColumn::make('desaStaf.name')
                     ->label('Desa'), 
                 ToggleColumn::make('status')
-                    ->label('Status'),
+                    ->label('Status')
+                    ->disabled(fn ($record) => $record->id === auth()->id()),
             
             ])
             ->filters([
